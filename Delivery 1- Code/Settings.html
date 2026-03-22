@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ 
+<title>Admin Settings</title>
+<link href="settings_style.css" rel="stylesheet">
+<link rel="stylesheet" href="settings_admin.css">
+
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<div class="TopNav">
+  <h2>Smart Course Companion</h2>
+  <ul>
+     <a href="Admin Main Page.html">
+            <li id="dashboard" > DashBoard </li>
+            </a>
+            <a href="Courses Page.html">
+            <li id="courses"> Courses</li>
+            </a>
+             <a href="Analyticss.html">
+            <li id="grades&charts"> Analytics </li>
+            </a>
+             <a href="Courses Template.html">
+            <li id="Courses Template"> Courses Template </li>
+            </a>
+    <a href="Settings.html" >
+            <li id="Settings" style="background-color: rgb(130, 100, 136); border-radius: 15px;"> Settings </li>
+            </a>
+  </ul>
+
+  <div class="TopNavIcons">
+    <div class="lightmode">
+      <a href="Admin Main Page.html">
+        <img src="https://static.thenounproject.com/png/4808961-200.png" alt="light mode icon" />
+      </a>
+    </div>
+    <div class="Logout">
+      <a href="login_ad.html">
+        <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" alt="Logout icon" />
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1><span class="icon">⚙️</span> Settings</h1>
+    <p>Manage your account, profile, and platform preferences.</p>
+  </div>
+
+  <!-- ACCOUNT PROFILE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">👤</div>
+      <div class="card-header-text">
+        <h3>Account Profile</h3>
+        <p>Your personal and academic information</p>
+      </div>
+    </div>
+
+    <div class="avatar-row">
+      <div class="avatar">
+        JD
+        <div class="avatar-edit">✏️</div>
+      </div>
+      <div class="avatar-info">
+        <h4>Dr. John Doe</h4>
+        <p>john.doe@concordia.ca</p>
+        <span class="badge">Admin / Instructor</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" value="John">
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" value="Doe">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" value="john.doe@concordia.ca">
+      </div>
+      <div class="form-group">
+        <label>Program / Department</label>
+        <select>
+          <option selected>Gina Cody School – Software Engineering</option>
+          <option>Gina Cody School – Computer Science</option>
+          <option>John Molson School of Business</option>
+          <option>Faculty of Arts & Science</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Current Term</label>
+        <select>
+          <option>Fall 2025</option>
+          <option selected>Winter 2026</option>
+          <option>Summer 2026</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Bio / Office Info</label>
+        <textarea>EV Building, Room 3.245 · Office hours: Mon &amp; Wed, 10:00–12:00</textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary">💾 Save Profile</button>
+      <button class="btn btn-ghost">🔑 Change Password</button>
+    </div>
+  </div>
+
+  <!-- COURSES + ADMIN CONTROLS -->
+  <div class="grid-2">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon teal">📚</div>
+        <div class="card-header-text">
+          <h3>Courses Taught</h3>
+          <p>Your active course assignments</p>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val">3</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">373</div>
+          <div class="stat-label">Students</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">12</div>
+          <div class="stat-label">Assessments</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Primary Course</label>
+        <select>
+          <option selected>SOEN 287 – Web Programming</option>
+          <option>COMP 352 – Data Structures</option>
+          <option>SOEN 341 – Software Process</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px">
+        <label>Academic Role</label>
+        <select>
+          <option selected>Instructor + Admin</option>
+          <option>Instructor</option>
+          <option>Teaching Assistant</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary">Update</button>
+        
+        <a href="Courses Page.html">
+<button class="btn btn-ghost">Manage All Courses →</button>
+        </a>
+        
+      
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon orange">🛡️</div>
+        <div class="card-header-text">
+          <h3>Admin Controls</h3>
+          <p>Platform-wide settings</p>
+        </div>
+      </div>
+
+      <div class="toggle-list">
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Student Self-Registration</h4>
+            <p>Allow students to create their own accounts</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Course Enrollment Open</h4>
+            <p>Students can add/drop courses freely</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Grades Visible to Students</h4>
+            <p>Students can see their marks in real time</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Anonymized Usage Statistics</h4>
+            <p>Collect completion &amp; engagement data</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Email Deadline Reminders</h4>
+            <p>Auto-send reminders 48h before due dates</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="apply-row">
+        <button class="btn btn-teal">Apply Changes</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="danger-card">
+    <div class="danger-header">
+      <div class="danger-icon">⚠️</div>
+      <h3>Danger Zone</h3>
+    </div>
+    <p class="danger-desc">The actions below are <strong>permanent and cannot be undone.</strong> Please proceed with caution.</p>
+
+    <div class="danger-actions">
+      <div class="danger-action">
+        <div class="danger-action-info">
+          <h4>Reset All Student Data</h4>
+          <p>Clears all grades, submissions, and progress — <span class="irreversible">this action is irreversible</span></p>
+        </div>
+        <button class="btn-danger">Reset Data</button>
+      </div>
+      <div class="danger-action">
+        <div class="danger-action-info">
+          <h4>Disable All Courses</h4>
+          <p>Removes student access to all active courses — <span class="irreversible">this action is irreversible</span></p>
+        </div>
+        <button class="btn-danger">Disable Courses</button>
+      </div>
+      <div class="danger-action">
+        <div class="danger-action-info">
+          <h4>Delete Admin Account</h4>
+          <p>Permanently removes your account and all data — <span class="irreversible">this action is irreversible</span></p>
+        </div>
+        <button class="btn-danger">Delete Account</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

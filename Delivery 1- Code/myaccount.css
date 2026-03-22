@@ -1,0 +1,180 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #c8b8e8 0%, #a8b8d8 50%, #b8c8e8 100%);
+    min-height: 100vh;
+    color: #1a1a2e;
+}
+
+/* ===== NAV BAR ===== */
+.nav-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    height: 60px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(100, 80, 180, 0.10);
+}
+
+.logo {
+    color: #2d1b6e;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    margin-right: auto;
+}
+
+.navlinks {
+    flex: 0 0 auto;
+    margin-left: 24px;
+}
+
+.navlinks a {
+    display: inline-block;
+    text-decoration: none;
+    white-space: nowrap;
+    color: #2d1b6e;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(100, 80, 200, 0.25);
+    background: rgba(255, 255, 255, 0.45);
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    letter-spacing: 0.2px;
+}
+
+.navlinks a:hover {
+    background: rgba(106, 79, 207, 0.15);
+    border-color: rgba(106, 79, 207, 0.5);
+    color: #4a2db8;
+}
+
+/* ===== MAIN CONTENT ===== */
+.content {
+    padding: 90px 40px 40px 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1040;
+    margin-bottom: 28px;
+    letter-spacing: -0.3px;
+}
+
+/* ===== ACCOUNT CONTAINER ===== */
+.account-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ===== ACCOUNT CARD ===== */
+.account-card {
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 14px;
+    padding: 28px 32px;
+    color: #1a1040;
+    box-shadow:
+        0 4px 24px rgba(80, 60, 160, 0.10),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.account-card:hover {
+    box-shadow:
+        0 8px 32px rgba(80, 60, 160, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    transform: translateY(-1px);
+}
+
+.account-card h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #5a3db0;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(90, 61, 176, 0.18);
+}
+
+.account-card p {
+    font-size: 15px;
+    color: #2a1a5e;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(90, 61, 176, 0.08);
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
+.account-card p:last-child {
+    border-bottom: none;
+}
+
+.account-card p strong {
+    font-weight: 600;
+    color: #3a2a80;
+    min-width: 150px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+/* ===== COURSE LIST ===== */
+.course-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.course-list li {
+    font-size: 15px;
+    color: #2a1a5e;
+    font-weight: 500;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(90, 61, 176, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.15s;
+}
+
+.course-list li:last-child {
+    border-bottom: none;
+}
+
+.course-list li::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7b5cf0, #60c0e0);
+    flex-shrink: 0;
+}

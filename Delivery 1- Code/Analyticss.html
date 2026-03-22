@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Analytics</title>
+        <link rel="stylesheet" href ="DesignAnalytics.css" />
+    </head>
+    <body>
+
+    <!-- TOP NAV -->
+    <div class="TopNav">
+        <h2>Smart Course Companion</h2>
+        <ul>
+           <a href="Admin Main Page.html">
+            <li id="dashboard"> DashBoard </li>
+            </a>
+            <a href="Courses Page.html">
+            <li id="courses"> Courses </li>
+            </a>
+             <a href="Analyticss.html">
+            <li id="grades&charts" style="background-color: rgb(130, 100, 136); border-radius: 15px;"> Analytics </li>
+            </a>
+            <a href="Courses Template.html">
+            <li id="Courses Template"> Courses Template
+            </li>
+            </a>
+            <a href="Settings.html">
+            <li id="Settings"> Settings </li>
+            </a>
+        </ul>
+
+        <!-- Icons for the lightmode and the logout Button -->
+        <div class="TopNavIcons">
+            <div class="lightmode">
+                <a href="">
+                    <img src="https://static.thenounproject.com/png/4808961-200.png"
+                         alt="light mode icon" />
+                </a>
+            </div>
+            <div class="Logout">
+                <a href="LOGIN_AD.html">
+                    <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png"
+                         alt="Logout icon" />
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- MAIN -->
+    <div class="MainContainer">
+        <div class="PageCenter">
+
+            <div class="GlassCard">
+                <h3>Grades & Charts — Winter 2026</h3>
+
+                <!-- Summary Bars -->
+                <div class="SummaryRow">
+                    <div class="SummaryPill">
+                        <div class="pill-num">4</div>
+                        <div class="pill-label">Active Courses</div>
+                    </div>
+                    <div class="SummaryPill">
+                        <div class="pill-num">373</div>
+                        <div class="pill-label">Total Students</div>
+                    </div>
+                    <div class="SummaryPill">
+                        <div class="pill-num">9</div>
+                        <div class="pill-label">Assessments</div>
+                    </div>
+                    <div class="SummaryPill">
+                        <div class="pill-num">53%</div>
+                        <div class="pill-label">Avg Completion</div>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="CourseTabs">
+                    <a href="#" class="CourseTab active">All Courses</a>
+                    <a href="#soen287" class="CourseTab">SOEN 287</a>
+                    <a href="#comp249" class="CourseTab">COMP 249</a>
+                    <a href="#engr233" class="CourseTab">ENGR 233</a>
+                </div>
+
+                <!-- Deadline Warning -->
+                <div class="DeadlineStrip">
+                    <span>⚠️</span>
+                    <p><strong>2 assessments</strong> have deadlines within the next 48 hours — COMP 249 Assignment 1 and ENGR 233 Quiz 1.</p>
+                </div>
+
+                <div class="CourseSection" id="soen287">
+                    <div class="CourseSectionHeader">
+                        <span class="CourseCodeBadge badge-soen">SOEN 287</span>
+                        <div>
+                            <h4>Web Programming</h4>
+                            <p>135 / 140 students enrolled</p>
+                        </div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Project Delivery 1 <span class="BarCategory">Project</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-high">On Track</span>
+                                <span class="BarPercent">89.6%</span>
+                                <span class="BarCount">121 / 135 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-high" style="width:89.6%"></div></div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Midterm Exam <span class="BarCategory">Exam</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-high">On Track</span>
+                                <span class="BarPercent">94.8%</span>
+                                <span class="BarCount">128 / 135 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-high" style="width:94.8%"></div></div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Quiz 1 <span class="BarCategory">Quiz</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-medium">In Progress</span>
+                                <span class="BarPercent">55.5%</span>
+                                <span class="BarCount">75 / 135 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-medium" style="width:55.5%"></div></div>
+                    </div>
+                </div>
+
+                <hr class="SectionDivider" />
+
+                <div class="CourseSection" id="comp249">
+                    <div class="CourseSectionHeader">
+                        <span class="CourseCodeBadge badge-comp">COMP 249</span>
+                        <div>
+                            <h4>Object-Oriented Programming II</h4>
+                            <p>156 / 200 students enrolled</p>
+                        </div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Assignment 1 <span class="BarCategory">Assignment</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-medium">In Progress</span>
+                                <span class="BarPercent">39.7%</span>
+                                <span class="BarCount">62 / 156 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-medium" style="width:39.7%"></div></div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Lab 1 — Inheritance <span class="BarCategory">Lab</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-low">Low Completion</span>
+                                <span class="BarPercent">22.4%</span>
+                                <span class="BarCount">35 / 156 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-low" style="width:22.4%"></div></div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Midterm Exam <span class="BarCategory">Exam</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-high">On Track</span>
+                                <span class="BarPercent">88.5%</span>
+                                <span class="BarCount">138 / 156 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-high" style="width:88.5%"></div></div>
+                    </div>
+                </div>
+
+                <hr class="SectionDivider" />
+
+                <div class="CourseSection" id="engr233">
+                    <div class="CourseSectionHeader">
+                        <span class="CourseCodeBadge badge-engr">ENGR 233</span>
+                        <div>
+                            <h4>Applied Advanced Calculus</h4>
+                            <p>82 / 85 students enrolled</p>
+                        </div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">WebWork Assignments <span class="BarCategory">Assignment</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-high">On Track</span>
+                                <span class="BarPercent">91.5%</span>
+                                <span class="BarCount">75 / 82 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-high" style="width:91.5%"></div></div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Lab Report 1 <span class="BarCategory">Lab</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-medium">In Progress</span>
+                                <span class="BarPercent">30.5%</span>
+                                <span class="BarCount">25 / 82 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-medium" style="width:30.5%"></div></div>
+                    </div>
+
+                    <div class="AssessmentBar">
+                        <div class="BarTopRow">
+                            <span class="BarName">Quiz 1 <span class="BarCategory">Quiz</span></span>
+                            <div class="BarMeta">
+                                <span class="StatusBadge status-low">Low Completion</span>
+                                <span class="BarPercent">18.3%</span>
+                                <span class="BarCount">15 / 82 students</span>
+                            </div>
+                        </div>
+                        <div class="BarTrack"><div class="BarFill fill-low" style="width:18.3%"></div></div>
+                    </div>
+                </div>
+
+                <hr class="SectionDivider" />
+
+                <!-- Export -->
+                <div class="ExportRow">
+                    <p>Export completion data for Winter 2026</p>
+                    <div class="ExportButtons">
+                        <a href="#" class="BtnExport">⬇ Export CSV</a>
+                        <a href="#" class="BtnExport">⬇ Export PDF</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    </body>
+</html>
