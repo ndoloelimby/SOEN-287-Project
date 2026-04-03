@@ -12,6 +12,10 @@ app.use(express.json());
 const gradesRouter = require('./routes/grades');
 app.use('/api/grades', gradesRouter);
 
+const adminCoursesRoutes = require('./routes/adminCourses');
+console.log('✅ registering adminCourses routes');
+app.use('/api', adminCoursesRoutes);
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
