@@ -9,12 +9,32 @@
 <body>
 
 <!-- Top bar with back button -->
-<div class="nav-bar">
-    <div class="logo">Smart Course Companion</div>
-    <div class="navlinks">
-        <a href="dashboardtrial.html">Back to Dashboard</a>
+<nav class="navbar">
+    <h2>Smart Course Companion</h2>
+    <ul>
+        <li><a href="dashboardtrial.html">Dashboard</a></li>
+        <li><a href="MYCOURSES.html">My Courses</a></li>
+        <li><a href="analytics.html">Analytics</a></li>
+    </ul>
+    <div class="nav-icons">
+        <div class="lightmode" onclick="toggleTheme()">
+            <img src="https://static.thenounproject.com/png/4808961-200.png" 
+                alt="light mode icon"/>
+        </div>
+        <div class="myaccount">
+            <a href="myaccount.html">
+                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" 
+                    alt="My Account"/>
+            </a>
+        </div>
+        <div class="logout">
+            <a href="Login_s.html">
+                <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" 
+                    alt="Logout"/>
+            </a>
+        </div>
     </div>
-</div>
+</nav>
 
 <main class="content">
     <h1>My Account</h1>

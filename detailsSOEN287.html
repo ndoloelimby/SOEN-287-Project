@@ -1,39 +1,60 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-         <link rel="stylesheet" type="text/css" href="student.css">
-        <title>Course Details</title>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="student.css">
+    <title>Course Details</title>
+</head>
 
-    </head>
-    
-    <body>
-        <nav class="navbar">
+<body>
+    <nav class="navbar">
+    <h2>Smart Course Companion</h2>
+    <ul>
+        <li><a href="dashboardtrial.html">Dashboard</a></li>
+        <li><a href="MYCOURSES.html">My Courses</a></li>
+        <li><a href="analytics.html">Analytics</a></li>
+    </ul>
+    <div class="nav-icons">
+        <div class="lightmode" onclick="toggleTheme()">
+            <img src="https://static.thenounproject.com/png/4808961-200.png" 
+                alt="light mode icon"/>
+        </div>
+        <div class="myaccount">
+            <a href="myaccount.html">
+                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" 
+                    alt="My Account"/>
+            </a>
+        </div>
+        <div class="logout">
+            <a href="Login_s.html">
+                <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" 
+                    alt="Logout"/>
+            </a>
+        </div>
+    </div>
+</nav>
 
-            <div class="logo">Smart Course Companion</div>
-           
-            <div class="nav-links">
-                <a href="dashboardtrial.html" class="nav-box">Dashboard</a>
-                <a href="MYCOURSES.html" class="nav-box">My courses</a>
-                <a href="analytics.html" class="nav-box">Analytics</a>
-            </div>
-         </nav>
-       
-        <hr>
+    <hr>
 
-        <div class="course">    
-
+    <div class="course">
         <h1>SOEN 287 - WEB PROGRAMMING</h1>
         <p><strong>Instructor:</strong> Dr. Jessica Miller</p>
-        <p><strong>Terms:</strong> Winter 2026</p>
-        </div>  
+        <p><strong>Term:</strong> Winter 2026</p>
+        <p id="courseAverage"><strong>Current Average: Loading...</strong></p>
+    </div>
 
-        <hr>
+    <hr>
 
-        <div class="assessments"> 
-
-        <h2>Assessments </h2>
+    <div class="assessments">
+        <h2>Assessments 
+            <button onclick="openModal()" 
+                style="margin-left:15px; padding:8px 16px; 
+                background:#6a4fcf; color:white; border:none; 
+                border-radius:8px; cursor:pointer;">
+                + Add Assessment
+            </button>
+        </h2>
 
         <table>
             <tr>
@@ -45,173 +66,83 @@
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
-
-            <tr>
-                <td>
-                    <input type="text" class="assessments-input" value="Project">
-                </td>
-                <td>
-                    <select>
-                        <option selected>Project</option>
-                        <option>Exam</option>
-                        <option>Assignment</option>
-                        <option>-</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="date" class="assessments-input" value="2026-02-20">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" value="8">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" value="10">
-                </td>
-                <td>
-                    <select>
-                        <option>Pending</option>
-                        <option selected>Completed</option>
-                    </select>
-                </td>
-                <td class="actions">
-                    <button type="button">Edit</button>
-                    <button type="button">Delete</button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    <input type="text" class="assessments-input" value="Midterm"></td>
-                <td>
-                    <select>
-                        <option >Project</option>
-                        <option selected>Exam</option>
-                        <option>Assignment</option>
-                        <option>-</option>
-                    </select
-                ></td>
-                <td>
-                    <input type="date" class="assessments-input" value="2026-03-15">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" placeholder="Enter earned">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" value="30">
-                </td>
-                <td>
-                    <select>
-                        <option selected>Pending</option>
-                        <option>Completed</option>
-                    </select>
-                
-                <td class="actions">
-                    <button type="button">Edit</button>
-                    <button type="button">Delete</button>
-                </td>
-
-            </tr>
-
-            <tr>
-                <td>
-                    <input type="text" class="assessments-input" value="Final exam"></td>
-                </td>
-                <td>
-                    <select>
-                        <option >Project</option>
-                        <option selected>Exam</option>
-                        <option>Assignment</option>
-                        <option>-</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="date" class="assessments-input" >
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" placeholder="Enter earned">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" value="50">
-                </td>
-                <td>
-                    <select>
-                        <option selected>Pending</option>
-                        <option>Completed</option>
-                    </select>
-                </td>
-                <td class="actions">
-                    <button type="button">Edit</button>
-                    <button type="button">Delete</button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    <input type="text" class="assessments-input" value="Assignment 1"></td>
-                </td>
-                <td>
-                    <select>
-                        <option >Project</option>
-                        <option>Exam</option>
-                        <option selected>Assignment</option>
-                        <option>-</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="date" class="assessments-input" value="2026-01-31" >
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" placeholder="Enter earned">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" value="3">
-                </td>
-                <td>
-                    <select>
-                        <option>Pending</option>
-                        <option selected>Completed</option>
-                    </select>
-                </td>
-                <td class="actions">
-                    <button type="button">Edit</button>
-                    <button type="button">Delete</button>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    <input type="text" class="assessments-input" placeholder="New assessment name"></td>
-                </td>
-                <td>
-                    <select>
-                        <option>Project</option>
-                        <option>Exam</option>
-                        <option>Assignment</option>
-                        <option selected>-</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="date" class="assessments-input">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" placeholder="Enter earned">
-                </td>
-                <td>
-                    <input type="number" class="assessments-input" min="0" step="0.01" placeholder="Enter total">
-                </td>
-                <td>
-                    <select>
-                        <option selected>Pending</option>
-                        <option>Completed</option>
-                    </select>
-                </td>
-                <td class="actions">
-                    <button type="button">Edit</button>
-                    <button type="button">Delete</button>
-                </td>
-            </tr>
-            </div>
+            <tbody id="gradesBody">
+            </tbody>
         </table>
-       
-    </body>
+    </div>
+
+    <!-- Add Assessment Modal -->
+    <div id="addModal" style="display:none; position:fixed; 
+        inset:0; background:rgba(0,0,0,0.5); 
+        justify-content:center; align-items:center; z-index:999;">
+        <div style="background:white; padding:30px; 
+            border-radius:16px; width:400px;">
+            <h3 style="margin-bottom:20px; color:#2d1b6e;">
+                Add Assessment
+            </h3>
+
+            <label>Name</label><br>
+            <input id="newName" type="text" 
+                placeholder="Assessment name"
+                style="width:100%; margin-bottom:10px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;"><br>
+
+            <label>Type</label><br>
+            <select id="newCategory" 
+                style="width:100%; margin-bottom:10px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;">
+                <option>Lab</option>
+                <option>Exam</option>
+                <option>Assignment</option>
+                <option>Quiz</option>
+                <option>Project</option>
+            </select><br>
+
+            <label>Due Date</label><br>
+            <input id="newDueDate" type="date"
+                style="width:100%; margin-bottom:10px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;"><br>
+
+            <label>Earned Marks</label><br>
+            <input id="newEarned" type="number" 
+                placeholder="Leave empty if not graded yet"
+                style="width:100%; margin-bottom:10px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;"><br>
+
+            <label>Total Marks</label><br>
+            <input id="newTotal" type="number" 
+                placeholder="Total marks"
+                style="width:100%; margin-bottom:10px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;"><br>
+
+            <label>Status</label><br>
+            <select id="newStatus" 
+                style="width:100%; margin-bottom:20px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;">
+                <option>pending</option>
+                <option>completed</option>
+            </select><br>
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="addAssessment()"
+                    style="flex:1; padding:10px; background:#6a4fcf; 
+                    color:white; border:none; border-radius:8px; 
+                    cursor:pointer;">Save</button>
+                <button onclick="closeModal()"
+                    style="flex:1; padding:10px; 
+                    background:rgba(106,79,207,0.1); 
+                    border:1px solid #6a4fcf; border-radius:8px; 
+                    cursor:pointer;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="details.js"></script>
+</body>
 </html>

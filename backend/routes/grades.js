@@ -140,4 +140,38 @@ router.get('/gpa/all', (req, res) => {
     );
 });
 
+// GET analytics data for a course
+router.get('/:courseId/analytics', (req, res) => {
+    const { courseId } = req.params;
+    const studentId = 1;
+
+    db.query(
+        `SELECT 
+            assessment_name,
+            category,
+            earned_marks,
+            total_marks,
+            status,
+            ROUND((earned_marks / total_marks) * 100, 2) 
+            as percentage
+        FROM student_grades
+        WHERE course_id = ? AND student_id = ?
+        AND earned_marks IS NOT NULL
+        ORDER BY created_at ASC`,
+        [courseId, studentId],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            const completed = results.length;
+            const total = completed;
+            const average = results.length > 0
+                ? (results.reduce((sum, r) => 
+                    sum + parseFloat(r.percentage), 0) / results.length).toFixed(2)
+                : 0;
+
+            res.json({ assessments: results, average, completed, total });
+        }
+    );
+});
+
 module.exports = router;
