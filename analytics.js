@@ -129,3 +129,16 @@ window.onload = () => {
         loadSummaryAnalytics();
     }
 };
+
+// Export functions
+function exportCSV() {
+    const courseId = getCourseId();
+    window.location.href = 
+        `${API}/${courseId}/export/csv`;
+}
+
+function exportPDF() {
+    const courseId = getCourseId();
+    window.location.href = 
+        `${API}/${courseId}/export/pdf`;
+}
