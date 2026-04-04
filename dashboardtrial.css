@@ -13,14 +13,92 @@ body {
 
 
 
+/* ── NAVBAR ── */
 .navbar {
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 15px 30px;
     background: rgba(255, 255, 255, 0.45);
     border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-    position: relative;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 0 30px;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(106, 79, 207, 0.15);
+    box-sizing: border-box;
+}
+
+.navbar h2 {
+    color: #2d1b6e;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 28px 0 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    gap: 4px;
+    flex: 1;
+}
+
+.navbar ul li {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    color: #2d1b6e;
+    height: 32px;
+}
+
+.navbar ul li:hover {
+    background: rgba(106, 79, 207, 0.15);
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navbar ul li.active {
+    background: rgba(106, 79, 207, 0.2);
+}
+
+.nav-icons {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-icons .lightmode img,
+.nav-icons .myaccount img,
+.nav-icons .logout img {
+    background: rgba(106, 79, 207, 0.1);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.nav-icons .lightmode img:hover,
+.nav-icons .myaccount img:hover,
+.nav-icons .logout img:hover {
+    background: rgba(106, 79, 207, 0.25);
 }
 
 .logo {

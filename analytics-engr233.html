@@ -1,95 +1,136 @@
-
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Analytics - COMP 249</title>
-        <link rel="stylesheet" href="analytics.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics - ENGR 233</title>
+    <link rel="stylesheet" href="analytics.css">
+</head>
 
-    <body>
-        <nav class="navbar">
-
-            <div class="logo">Smart Course Companion - Analytics </div>
-           
-            <div class="nav-links">
-                <a href="dashboardtrial.html" class="nav-box">Dashboard</a>
-                <a href="MYCOURSES.html" class="nav-box">My courses</a>
-                <!--<a href="analytics.html" class="nav-box">Analytics</a>-->
+<body>
+    <nav class="navbar">
+        <h2>Smart Course Companion</h2>
+        <ul>
+            <li><a href="dashboardtrial.html">Dashboard</a></li>
+            <li><a href="MYCOURSES.html">My Courses</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+        </ul>
+        <div class="nav-icons">
+            <div class="lightmode" onclick="toggleTheme()">
+                <img src="https://static.thenounproject.com/png/4808961-200.png" 
+                    alt="light mode icon"/>
             </div>
-         </nav>
+            <div class="myaccount">
+                <a href="myaccount.html">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" 
+                        alt="My Account"/>
+                </a>
+            </div>
+            <div class="logout">
+                <a href="Login_s.html">
+                    <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" 
+                        alt="Logout"/>
+                </a>
+            </div>
+        </div>
+    </nav>
 
-         <div class="layout">
-                <aside class="sidebar">
-                    <h2>Analytics</h2>
+    <div class="layout">
+        <aside class="sidebar">
+            <h2>Analytics</h2>
+            <a class="course-link" 
+                href="analytics.html">All Courses</a>
+            <a class="course-link" 
+                href="analytics-soen287.html">SOEN 287</a>
+            <a class="course-link" 
+                href="analytics-comp249.html">COMP 249</a>
+            <a class="course-link active-course" 
+                href="analytics-engr233.html">ENGR 233</a>
+            <a class="course-link" 
+                href="analytics-soen228.html">SOEN 228</a>
+        </aside>
 
-                    <a class="course-link" href="analytics.html">All Courses (Summary)</a>
-                    <a class="course-link" href="analytics-comp249.html">COMP 249</a>
-                    <a class="course-link" href="analytics-soen287.html">SOEN 287</a>
-                    <a class="course-link active-course" href="analytics-engr233.html">ENGR 233</a>
-                    <a class="course-link" href="analytics-soen228.html">SOEN 228</a>
+        <main class="content">
+            <h1>Analytics - ENGR 233</h1>
 
-                </aside>
+            <section class="stats-grid">
 
-                <main class="content">
-                    <h1>Analytics - ENGR 233</h1>
-                    
-                    <section class="stats-grid">
-
-                        <div class="stat-card">
-                            <h2>Current Average</h2>
-                            <div class="stat-body">
-                                <div class="ring" style="--p:65;">
-                                    <span class="ring-center">65%</span>
-                                </div>
+                <div class="stat-card">
+                    <h2>Current Average</h2>
+                    <div class="stat-body" 
+                        style="display:flex; gap:24px;">
+                        <div>
+                            <p style="font-size:11px; 
+                                opacity:0.6; margin-bottom:4px;">
+                                Average</p>
+                            <div id="averageRing" 
+                                class="ring" style="--p:0;">
+                                <span class="ring-center" 
+                                    id="averageValue">0%</span>
                             </div>
                         </div>
-
-                        <div class="stat-card">
-                            <h2>Assessment Completion</h2>
-
-                            <div class="stat-body">
-                                <div class="ring" style="--p:77;">
-                                    <span class="ring-center">77%</span>
-                                </div>
-
-                                <div>
-                                    <p class="done">4 / 5</p>
-                                    <p class="remaining">1 remaining</p>
-                                </div>
-
+                        <div>
+                            <p style="font-size:11px; 
+                                opacity:0.6; margin-bottom:4px;">
+                                GPA</p>
+                            <div id="gpaRing" 
+                                class="ring" style="--p:0;">
+                                <span class="ring-center" 
+                                    id="gpaValue">0</span>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="stat-card wide">
-                            <h2>Performance Trend</h2>
-                            
-                            <div class="trend-row">
-                                <span>Midterm</span>
-                                <div class="trend-bar-wrap">
-                                    <div class="trend-bar" style="width:79%;"></div>
-                                </div>
-                                <span>79%</span>
-                            </div>
-
-                           <div class="trend-row">
-                            <span>Quiz 1</span>
-                            <div class="trend-bar-wrap">
-                                <div class="trend-bar" style="width:80%;"></div>
-                            </div>
-                            <span>80%</span>
-                           </div>
-
-                           <div class="trend-row">
-                            <span>Assignment 1</span>
-                            <div class="trend-bar-wrap">
-                                <div class="trend-bar" style="width:56%;"></div>
-                            </div>
-                            <span>56%</span>
-                           </div>
+                <div class="stat-card">
+                    <h2>Assessment Completion</h2>
+                    <div class="stat-body">
+                        <div class="ring" style="--p:0;">
+                            <span class="ring-center" 
+                                id="completionValue">0 / 0</span>
                         </div>
-                    </section>
-                </main>
-         </div>
-    </body>
+                    </div>
+                </div>
+
+                <div class="stat-card wide">
+                    <h2>Performance Trend</h2>
+                    <div id="trendBars">
+                        <p style="opacity:0.5;">
+                            No graded assessments yet.</p>
+                    </div>
+                </div>
+
+            </section>
+            <!-- Export Section -->
+<div style="margin-top:30px; padding:20px; 
+    background:rgba(255,255,255,0.1);
+    border-radius:16px; 
+    border:1px solid rgba(150,120,220,0.3);">
+    <h3 style="margin-bottom:15px;">Export Grades</h3>
+    <p style="font-size:13px; opacity:0.6; 
+        margin-bottom:15px;">
+        Download your grades for this course
+    </p>
+    <div style="display:flex; gap:12px;">
+        <button onclick="exportCSV()" 
+            style="padding:10px 20px; 
+            background:#6a4fcf; color:white; 
+            border:none; border-radius:8px; 
+            cursor:pointer; font-size:14px;">
+            Export CSV
+        </button>
+        <button onclick="exportPDF()"
+            style="padding:10px 20px;
+            background:#6a4fcf; color:white;
+            border:none; border-radius:8px;
+            cursor:pointer; font-size:14px;">
+            Export PDF
+        </button>
+    </div>
+</div>
+        </main>
+    </div>
+
+    <script src="analytics.js"></script>
+    <script src="theme.js"></script>
+</body>
 </html>
