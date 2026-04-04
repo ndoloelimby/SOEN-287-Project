@@ -1,36 +1,33 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
- 
 <title>Admin Settings</title>
 <link href="settings_style.css" rel="stylesheet">
-<link rel="stylesheet" href="settings_admin.css">
 
+<!-- Toast -->
+<style>
+#toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:rgba(20,14,50,.97); border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:13px 22px; font-size:14px; font-weight:bold; color:white; z-index:9999; transition:transform .35s ease,opacity .35s ease; opacity:0; pointer-events:none; backdrop-filter:blur(14px); display:flex; align-items:center; gap:10px; white-space:nowrap; }
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+#toast.toast-success { border-color:rgba(0,206,201,.55); }
+#toast.toast-error   { border-color:rgba(255,107,107,.55); }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+.skeleton { display:inline-block; background:rgba(255,255,255,.15); border-radius:6px; animation:pulse 1.4s ease infinite; min-width:40px; }
+</style>
 </head>
 <body>
+
+<div id="toast"></div>
 
 <!-- Top Navigation Bar -->
 <div class="TopNav">
   <h2>Smart Course Companion</h2>
   <ul>
-     <a href="Admin Main Page.html">
-            <li id="dashboard" > DashBoard </li>
-            </a>
-            <a href="Courses Page.html">
-            <li id="courses"> Courses</li>
-            </a>
-             <a href="Analyticss.html">
-            <li id="grades&charts"> Analytics </li>
-            </a>
-             <a href="Courses Template.html">
-            <li id="Courses Template"> Courses Template </li>
-            </a>
-    <a href="Settings.html" >
-            <li id="Settings" style="background-color: rgb(130, 100, 136); border-radius: 15px;"> Settings </li>
-            </a>
+    <a href="Admin Main Page.html"><li id="dashboard">DashBoard</li></a>
+    <a href="Courses Page.html"><li id="courses">Courses</li></a>
+    <a href="Analyticss.html"><li id="grades&charts">Analytics</li></a>
+    <a href="Courses Template.html"><li id="Courses Template">Courses Template</li></a>
+    <a href="Settings.html"><li id="Settings" style="background-color:rgb(130,100,136);border-radius:15px;">Settings</li></a>
   </ul>
-
   <div class="TopNavIcons">
     <div class="lightmode">
       <a href="Admin Main Page.html">
@@ -63,13 +60,13 @@
     </div>
 
     <div class="avatar-row">
-      <div class="avatar">
+      <div class="avatar" id="avatar-initials">
         JD
         <div class="avatar-edit">✏️</div>
       </div>
       <div class="avatar-info">
-        <h4>Dr. John Doe</h4>
-        <p>john.doe@concordia.ca</p>
+        <h4 id="avatar-name">Dr. John Doe</h4>
+        <p id="avatar-email">john.doe@concordia.ca</p>
         <span class="badge">Admin / Instructor</span>
       </div>
     </div>
@@ -77,20 +74,20 @@
     <div class="form-grid">
       <div class="form-group">
         <label>First Name</label>
-        <input type="text" value="John">
+        <input type="text" id="prof-first" value="John">
       </div>
       <div class="form-group">
         <label>Last Name</label>
-        <input type="text" value="Doe">
+        <input type="text" id="prof-last" value="Doe">
       </div>
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" value="john.doe@concordia.ca">
+        <input type="email" id="prof-email" value="john.doe@concordia.ca">
       </div>
       <div class="form-group">
         <label>Program / Department</label>
-        <select>
-          <option selected>Gina Cody School – Software Engineering</option>
+        <select id="prof-dept">
+          <option>Gina Cody School – Software Engineering</option>
           <option>Gina Cody School – Computer Science</option>
           <option>John Molson School of Business</option>
           <option>Faculty of Arts & Science</option>
@@ -98,20 +95,20 @@
       </div>
       <div class="form-group">
         <label>Current Term</label>
-        <select>
+        <select id="prof-term">
           <option>Fall 2025</option>
-          <option selected>Winter 2026</option>
+          <option>Winter 2026</option>
           <option>Summer 2026</option>
         </select>
       </div>
       <div class="form-group full">
         <label>Bio / Office Info</label>
-        <textarea>EV Building, Room 3.245 · Office hours: Mon &amp; Wed, 10:00–12:00</textarea>
+        <textarea id="prof-bio">EV Building, Room 3.245 · Office hours: Mon &amp; Wed, 10:00–12:00</textarea>
       </div>
     </div>
 
     <div class="form-actions">
-      <button class="btn btn-primary">💾 Save Profile</button>
+      <button class="btn btn-primary" id="btn-save-profile">💾 Save Profile</button>
       <button class="btn btn-ghost">🔑 Change Password</button>
     </div>
   </div>
@@ -130,45 +127,40 @@
 
       <div class="stats-row">
         <div class="stat-box">
-          <div class="stat-val">3</div>
+          <div class="stat-val" id="stat-active"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
           <div class="stat-label">Active</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val">373</div>
+          <div class="stat-val" id="stat-students"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
           <div class="stat-label">Students</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val">12</div>
+          <div class="stat-val" id="stat-assessments"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
           <div class="stat-label">Assessments</div>
         </div>
       </div>
 
       <div class="form-group" style="margin-bottom:16px">
         <label>Primary Course</label>
-        <select>
-          <option selected>SOEN 287 – Web Programming</option>
-          <option>COMP 352 – Data Structures</option>
-          <option>SOEN 341 – Software Process</option>
+        <select id="primary-course-select">
+          <option value="">Loading courses...</option>
         </select>
       </div>
 
       <div class="form-group" style="margin-bottom:24px">
         <label>Academic Role</label>
-        <select>
-          <option selected>Instructor + Admin</option>
+        <select id="academic-role">
+          <option>Instructor + Admin</option>
           <option>Instructor</option>
           <option>Teaching Assistant</option>
         </select>
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-primary">Update</button>
-        
+        <button class="btn btn-primary" id="btn-update-courses">Update</button>
         <a href="Courses Page.html">
-<button class="btn btn-ghost">Manage All Courses →</button>
+          <button class="btn btn-ghost">Manage All Courses →</button>
         </a>
-        
-      
       </div>
     </div>
 
@@ -188,7 +180,7 @@
             <p>Allow students to create their own accounts</p>
           </div>
           <label class="toggle">
-            <input type="checkbox" checked>
+            <input type="checkbox" id="tog-self-reg" checked>
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -198,7 +190,7 @@
             <p>Students can add/drop courses freely</p>
           </div>
           <label class="toggle">
-            <input type="checkbox" checked>
+            <input type="checkbox" id="tog-enrollment" checked>
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -208,7 +200,7 @@
             <p>Students can see their marks in real time</p>
           </div>
           <label class="toggle">
-            <input type="checkbox">
+            <input type="checkbox" id="tog-grades">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -218,7 +210,7 @@
             <p>Collect completion &amp; engagement data</p>
           </div>
           <label class="toggle">
-            <input type="checkbox" checked>
+            <input type="checkbox" id="tog-stats" checked>
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -228,14 +220,14 @@
             <p>Auto-send reminders 48h before due dates</p>
           </div>
           <label class="toggle">
-            <input type="checkbox">
+            <input type="checkbox" id="tog-reminders">
             <span class="toggle-slider"></span>
           </label>
         </div>
       </div>
 
       <div class="apply-row">
-        <button class="btn btn-teal">Apply Changes</button>
+        <button class="btn btn-teal" id="btn-apply-controls">Apply Changes</button>
       </div>
     </div>
 
@@ -255,25 +247,216 @@
           <h4>Reset All Student Data</h4>
           <p>Clears all grades, submissions, and progress — <span class="irreversible">this action is irreversible</span></p>
         </div>
-        <button class="btn-danger">Reset Data</button>
+        <button class="btn-danger" id="btn-reset-data">Reset Data</button>
       </div>
       <div class="danger-action">
         <div class="danger-action-info">
           <h4>Disable All Courses</h4>
           <p>Removes student access to all active courses — <span class="irreversible">this action is irreversible</span></p>
         </div>
-        <button class="btn-danger">Disable Courses</button>
+        <button class="btn-danger" id="btn-disable-courses">Disable Courses</button>
       </div>
       <div class="danger-action">
         <div class="danger-action-info">
           <h4>Delete Admin Account</h4>
           <p>Permanently removes your account and all data — <span class="irreversible">this action is irreversible</span></p>
         </div>
-        <button class="btn-danger">Delete Account</button>
+        <button class="btn-danger" id="btn-delete-account">Delete Account</button>
       </div>
     </div>
   </div>
 
 </div>
+
+<script>
+    const API = 'http://localhost:3000/api';
+    const PROFILE_KEY  = 'scc_admin_profile';
+    const CONTROLS_KEY = 'scc_admin_controls';
+    const COURSES_KEY  = 'scc_admin_courses_pref';
+
+    function showToast(msg, type='success') {
+        const t = document.getElementById('toast');
+        t.textContent = (type==='success'?'✅ ':'❌ ') + msg;
+        t.className = 'show toast-'+type;
+        setTimeout(()=>{ t.className=''; }, 3000);
+    }
+
+    // ── Update avatar initials + header ──
+    function refreshAvatar() {
+        const first = document.getElementById('prof-first').value.trim();
+        const last  = document.getElementById('prof-last').value.trim();
+        const email = document.getElementById('prof-email').value.trim();
+        const initials = ((first[0]||'')+(last[0]||'')).toUpperCase() || 'AD';
+        document.getElementById('avatar-initials').childNodes[0].textContent = initials+'\n        ';
+        document.getElementById('avatar-name').textContent  = `${first} ${last}`.trim() || 'Admin';
+        document.getElementById('avatar-email').textContent = email;
+    }
+
+    // ════════════════════════════════════
+    // PROFILE — localStorage
+    // ════════════════════════════════════
+    function loadProfile() {
+        const saved = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+        if (saved.first) document.getElementById('prof-first').value = saved.first;
+        if (saved.last)  document.getElementById('prof-last').value  = saved.last;
+        if (saved.email) document.getElementById('prof-email').value = saved.email;
+        if (saved.dept)  document.getElementById('prof-dept').value  = saved.dept;
+        if (saved.term)  document.getElementById('prof-term').value  = saved.term;
+        if (saved.bio)   document.getElementById('prof-bio').value   = saved.bio;
+        refreshAvatar();
+    }
+
+    document.getElementById('btn-save-profile').addEventListener('click', () => {
+        const profile = {
+            first: document.getElementById('prof-first').value.trim(),
+            last:  document.getElementById('prof-last').value.trim(),
+            email: document.getElementById('prof-email').value.trim(),
+            dept:  document.getElementById('prof-dept').value,
+            term:  document.getElementById('prof-term').value,
+            bio:   document.getElementById('prof-bio').value.trim(),
+        };
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        refreshAvatar();
+        showToast('Profile saved!');
+    });
+
+    // Live avatar update as you type
+    ['prof-first','prof-last','prof-email'].forEach(id =>
+        document.getElementById(id).addEventListener('input', refreshAvatar)
+    );
+
+    // ════════════════════════════════════
+    // COURSES TAUGHT — from backend
+    // ════════════════════════════════════
+    async function loadCoursesStats() {
+        try {
+            const courses = await fetch(`${API}/courses`).then(r=>r.json());
+            const active  = courses.filter(c=>c.is_enabled);
+
+            // Count assessments across all active courses
+            const templateCounts = await Promise.all(
+                active.map(c => fetch(`${API}/templates/${c.id}`).then(r=>r.json()).then(t=>t.length))
+            );
+            const totalAssessments = templateCounts.reduce((s,n)=>s+n, 0);
+            const totalStudents    = active.reduce((s,c)=>s+(parseInt(c.max_students)||0), 0);
+
+            document.getElementById('stat-active').textContent      = active.length;
+            document.getElementById('stat-students').textContent    = totalStudents;
+            document.getElementById('stat-assessments').textContent = totalAssessments;
+
+            // Populate primary course dropdown
+            const sel    = document.getElementById('primary-course-select');
+            const saved  = JSON.parse(localStorage.getItem(COURSES_KEY)||'{}');
+            sel.innerHTML = courses.map(c =>
+                `<option value="${c.id}" ${saved.primaryId==c.id?'selected':''}>${c.course_code} – ${c.course_name}</option>`
+            ).join('');
+
+            // Restore role
+            if (saved.role) document.getElementById('academic-role').value = saved.role;
+
+        } catch {
+            ['stat-active','stat-students','stat-assessments'].forEach(id=>{
+                document.getElementById(id).textContent = '—';
+            });
+            document.getElementById('primary-course-select').innerHTML =
+                '<option value="">❌ Cannot connect to server</option>';
+        }
+    }
+
+    document.getElementById('btn-update-courses').addEventListener('click', () => {
+        const prefs = {
+            primaryId: document.getElementById('primary-course-select').value,
+            role:      document.getElementById('academic-role').value,
+        };
+        localStorage.setItem(COURSES_KEY, JSON.stringify(prefs));
+        showToast('Course preferences saved!');
+    });
+
+    // ════════════════════════════════════
+    // ADMIN CONTROLS — localStorage
+    // ════════════════════════════════════
+    const TOGGLE_IDS = ['tog-self-reg','tog-enrollment','tog-grades','tog-stats','tog-reminders'];
+
+    function loadControls() {
+        const saved = JSON.parse(localStorage.getItem(CONTROLS_KEY)||'{}');
+        TOGGLE_IDS.forEach(id => {
+            if (id in saved) document.getElementById(id).checked = saved[id];
+        });
+    }
+
+    document.getElementById('btn-apply-controls').addEventListener('click', () => {
+        const controls = {};
+        TOGGLE_IDS.forEach(id => { controls[id] = document.getElementById(id).checked; });
+        localStorage.setItem(CONTROLS_KEY, JSON.stringify(controls));
+        showToast('Admin controls saved!');
+    });
+
+    // ════════════════════════════════════
+    // DANGER ZONE — backend actions
+    // ════════════════════════════════════
+
+    // Disable All Courses — sets is_enabled=0 on every course via PUT
+    document.getElementById('btn-disable-courses').addEventListener('click', async () => {
+        if (!confirm('Disable ALL active courses? Students will lose access immediately.')) return;
+        try {
+            const courses = await fetch(`${API}/courses`).then(r=>r.json());
+            const active  = courses.filter(c=>c.is_enabled);
+            if (!active.length) { showToast('No active courses to disable.','error'); return; }
+            await Promise.all(active.map(c =>
+                fetch(`${API}/courses/${c.id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({...c, is_enabled: 0})
+                })
+            ));
+            showToast(`${active.length} course(s) disabled.`);
+            loadCoursesStats(); // refresh stats
+        } catch {
+            showToast('Failed to disable courses.','error');
+        }
+    });
+
+    // Reset Data — clears all templates (closest to "reset" with current backend)
+    document.getElementById('btn-reset-data').addEventListener('click', async () => {
+        if (!confirm('Delete ALL assessment templates across all courses? This cannot be undone.')) return;
+        try {
+            const courses = await fetch(`${API}/courses`).then(r=>r.json());
+            const allTemplates = (await Promise.all(
+                courses.map(c => fetch(`${API}/templates/${c.id}`).then(r=>r.json()))
+            )).flat();
+            await Promise.all(allTemplates.map(t =>
+                fetch(`${API}/templates/${t.id}`, {method:'DELETE'})
+            ));
+            showToast(`${allTemplates.length} template(s) deleted.`);
+            loadCoursesStats();
+        } catch {
+            showToast('Failed to reset data.','error');
+        }
+    });
+
+    // Delete Account — clears localStorage and redirects to login
+    document.getElementById('btn-delete-account').addEventListener('click', () => {
+        if (!confirm('Delete your admin account? This will clear all local settings and log you out.')) return;
+        [PROFILE_KEY, CONTROLS_KEY, COURSES_KEY, 'scc_page_history'].forEach(k => localStorage.removeItem(k));
+        showToast('Account data cleared. Redirecting...');
+        setTimeout(() => {
+            window.location.href = 'login_ad.html';
+        }, 1500);
+    });
+
+    // ════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════
+    loadProfile();
+    loadControls();
+    loadCoursesStats();
+
+    // Visit tracking for dashboard recent pages
+    (function() {
+        let h = JSON.parse(localStorage.getItem('scc_page_history') || '[]');
+        h = ['Settings.html', ...h.filter(p => p !== 'Settings.html')].slice(0, 10);
+        localStorage.setItem('scc_page_history', JSON.stringify(h));
+    })();
+</script>
 </body>
 </html>

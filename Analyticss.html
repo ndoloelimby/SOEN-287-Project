@@ -4,7 +4,38 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Analytics</title>
-        <link rel="stylesheet" href ="DesignAnalytics.css" />
+        <link rel="stylesheet" href="DesignAnalytics.css" />
+        <style>
+            @keyframes pulse {
+                0%, 100% { opacity: 0.4; }
+                50%       { opacity: 0.9; }
+            }
+            .skeleton {
+                display: inline-block;
+                background: rgba(255,255,255,0.15);
+                border-radius: 6px;
+                animation: pulse 1.4s ease infinite;
+            }
+            .skeleton-block {
+                background: rgba(255,255,255,0.1);
+                border-radius: 10px;
+                animation: pulse 1.4s ease infinite;
+                margin: 14px 0;
+            }
+            .CourseTab.active {
+                background: rgba(130,100,136,0.5);
+                border-radius: 10px;
+            }
+            .empty-state {
+                color: rgba(255,255,255,0.3);
+                font-style: italic;
+                padding: 20px 0;
+                text-align: center;
+            }
+            .deadline-item {
+                display: inline;
+            }
+        </style>
     </head>
     <body>
 
@@ -22,227 +53,307 @@
             <li id="grades&charts" style="background-color: rgb(130, 100, 136); border-radius: 15px;"> Analytics </li>
             </a>
             <a href="Courses Template.html">
-            <li id="Courses Template"> Courses Template
-            </li>
+            <li id="Courses Template"> Courses Template</li>
             </a>
             <a href="Settings.html">
             <li id="Settings"> Settings </li>
             </a>
         </ul>
-
-        <!-- Icons for the lightmode and the logout Button -->
         <div class="TopNavIcons">
             <div class="lightmode">
                 <a href="">
-                    <img src="https://static.thenounproject.com/png/4808961-200.png"
-                         alt="light mode icon" />
+                    <img src="https://static.thenounproject.com/png/4808961-200.png" alt="light mode icon" />
                 </a>
             </div>
             <div class="Logout">
                 <a href="LOGIN_AD.html">
-                    <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png"
-                         alt="Logout icon" />
+                    <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" alt="Logout icon" />
                 </a>
             </div>
         </div>
     </div>
+
     <!-- MAIN -->
     <div class="MainContainer">
         <div class="PageCenter">
-
             <div class="GlassCard">
-                <h3>Grades & Charts — Winter 2026</h3>
+                <h3 id="page-title">Grades & Charts</h3>
 
-                <!-- Summary Bars -->
+                <!-- SUMMARY PILLS -->
                 <div class="SummaryRow">
                     <div class="SummaryPill">
-                        <div class="pill-num">4</div>
+                        <div class="pill-num" id="pill-courses"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
                         <div class="pill-label">Active Courses</div>
                     </div>
                     <div class="SummaryPill">
-                        <div class="pill-num">373</div>
+                        <div class="pill-num" id="pill-students"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
                         <div class="pill-label">Total Students</div>
                     </div>
                     <div class="SummaryPill">
-                        <div class="pill-num">9</div>
+                        <div class="pill-num" id="pill-assessments"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
                         <div class="pill-label">Assessments</div>
                     </div>
                     <div class="SummaryPill">
-                        <div class="pill-num">53%</div>
+                        <div class="pill-num" id="pill-weight"><span class="skeleton">&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
                         <div class="pill-label">Avg Completion</div>
                     </div>
                 </div>
 
-                <!-- Filter Tabs -->
-                <div class="CourseTabs">
-                    <a href="#" class="CourseTab active">All Courses</a>
-                    <a href="#soen287" class="CourseTab">SOEN 287</a>
-                    <a href="#comp249" class="CourseTab">COMP 249</a>
-                    <a href="#engr233" class="CourseTab">ENGR 233</a>
+                <!-- FILTER TABS -->
+                <div class="CourseTabs" id="course-tabs">
+                    <a href="#" class="CourseTab active" data-filter="all">All Courses</a>
+                    <!-- course tabs injected by JS -->
                 </div>
 
-                <!-- Deadline Warning -->
-                <div class="DeadlineStrip">
+                <!-- DEADLINE WARNING -->
+                <div class="DeadlineStrip" id="deadline-strip" style="display:none;">
                     <span>⚠️</span>
-                    <p><strong>2 assessments</strong> have deadlines within the next 48 hours — COMP 249 Assignment 1 and ENGR 233 Quiz 1.</p>
+                    <p id="deadline-text"></p>
                 </div>
 
-                <div class="CourseSection" id="soen287">
-                    <div class="CourseSectionHeader">
-                        <span class="CourseCodeBadge badge-soen">SOEN 287</span>
-                        <div>
-                            <h4>Web Programming</h4>
-                            <p>135 / 140 students enrolled</p>
-                        </div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Project Delivery 1 <span class="BarCategory">Project</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-high">On Track</span>
-                                <span class="BarPercent">89.6%</span>
-                                <span class="BarCount">121 / 135 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-high" style="width:89.6%"></div></div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Midterm Exam <span class="BarCategory">Exam</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-high">On Track</span>
-                                <span class="BarPercent">94.8%</span>
-                                <span class="BarCount">128 / 135 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-high" style="width:94.8%"></div></div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Quiz 1 <span class="BarCategory">Quiz</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-medium">In Progress</span>
-                                <span class="BarPercent">55.5%</span>
-                                <span class="BarCount">75 / 135 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-medium" style="width:55.5%"></div></div>
-                    </div>
+                <!-- COURSE SECTIONS -->
+                <div id="courses-container">
+                    <div class="skeleton-block" style="height:120px;"></div>
+                    <div class="skeleton-block" style="height:120px;margin-top:20px;"></div>
                 </div>
 
                 <hr class="SectionDivider" />
 
-                <div class="CourseSection" id="comp249">
-                    <div class="CourseSectionHeader">
-                        <span class="CourseCodeBadge badge-comp">COMP 249</span>
-                        <div>
-                            <h4>Object-Oriented Programming II</h4>
-                            <p>156 / 200 students enrolled</p>
-                        </div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Assignment 1 <span class="BarCategory">Assignment</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-medium">In Progress</span>
-                                <span class="BarPercent">39.7%</span>
-                                <span class="BarCount">62 / 156 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-medium" style="width:39.7%"></div></div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Lab 1 — Inheritance <span class="BarCategory">Lab</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-low">Low Completion</span>
-                                <span class="BarPercent">22.4%</span>
-                                <span class="BarCount">35 / 156 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-low" style="width:22.4%"></div></div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Midterm Exam <span class="BarCategory">Exam</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-high">On Track</span>
-                                <span class="BarPercent">88.5%</span>
-                                <span class="BarCount">138 / 156 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-high" style="width:88.5%"></div></div>
-                    </div>
-                </div>
-
-                <hr class="SectionDivider" />
-
-                <div class="CourseSection" id="engr233">
-                    <div class="CourseSectionHeader">
-                        <span class="CourseCodeBadge badge-engr">ENGR 233</span>
-                        <div>
-                            <h4>Applied Advanced Calculus</h4>
-                            <p>82 / 85 students enrolled</p>
-                        </div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">WebWork Assignments <span class="BarCategory">Assignment</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-high">On Track</span>
-                                <span class="BarPercent">91.5%</span>
-                                <span class="BarCount">75 / 82 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-high" style="width:91.5%"></div></div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Lab Report 1 <span class="BarCategory">Lab</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-medium">In Progress</span>
-                                <span class="BarPercent">30.5%</span>
-                                <span class="BarCount">25 / 82 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-medium" style="width:30.5%"></div></div>
-                    </div>
-
-                    <div class="AssessmentBar">
-                        <div class="BarTopRow">
-                            <span class="BarName">Quiz 1 <span class="BarCategory">Quiz</span></span>
-                            <div class="BarMeta">
-                                <span class="StatusBadge status-low">Low Completion</span>
-                                <span class="BarPercent">18.3%</span>
-                                <span class="BarCount">15 / 82 students</span>
-                            </div>
-                        </div>
-                        <div class="BarTrack"><div class="BarFill fill-low" style="width:18.3%"></div></div>
-                    </div>
-                </div>
-
-                <hr class="SectionDivider" />
-
-                <!-- Export -->
+                <!-- EXPORT -->
                 <div class="ExportRow">
-                    <p>Export completion data for Winter 2026</p>
+                    <p id="export-label">Export completion data</p>
                     <div class="ExportButtons">
-                        <a href="#" class="BtnExport">⬇ Export CSV</a>
+                        <a href="#" class="BtnExport" id="btn-csv">⬇ Export CSV</a>
                         <a href="#" class="BtnExport">⬇ Export PDF</a>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        // Badge colour per course code prefix
+        function badgeClass(code) {
+            const prefix = code.split(' ')[0].toLowerCase();
+            const map = { soen: 'badge-soen', comp: 'badge-comp', engr: 'badge-engr', math: 'badge-engr', elec: 'badge-comp' };
+            return map[prefix] || 'badge-soen';
+        }
+
+        // Completion status thresholds
+        function statusInfo(pct) {
+            if (pct >= 75) return { cls: 'status-high',   fillCls: 'fill-high',   label: 'On Track' };
+            if (pct >= 40) return { cls: 'status-medium', fillCls: 'fill-medium', label: 'In Progress' };
+            return            { cls: 'status-low',    fillCls: 'fill-low',    label: 'Low Completion' };
+        }
+
+        // Format a datetime string nicely
+        function fmtDate(d) {
+            if (!d) return null;
+            return new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Is this due within the next 48 hours?
+        function soonDeadline(d) {
+            if (!d) return false;
+            const diff = new Date(d) - Date.now();
+            return diff > 0 && diff < 48 * 3600 * 1000;
+        }
+
+        // ── Main load ────────────────────────────────────────
+        async function loadAnalytics() {
+            try {
+                const res     = await fetch(`${API}/courses`);
+                const courses = await res.json();
+
+                // Fetch all templates in parallel
+                const templateResults = await Promise.all(
+                    courses.map(c => fetch(`${API}/templates/${c.id}`).then(r => r.json()).then(tmpl => {
+                        tmpl.forEach(t => { t._course = c; });
+                        return tmpl;
+                    }))
+                );
+
+                const allTemplates = templateResults.flat();
+                const activeCourses = courses.filter(c => c.is_enabled);
+
+                // ── Summary pills ──
+                const totalStudents    = activeCourses.reduce((s, c) => s + (c.max_students || 0), 0);
+                const totalAssessments = allTemplates.length;
+                const totalWeight      = allTemplates.reduce((s, t) => s + (parseFloat(t.weight) || 0), 0);
+                const terms            = [...new Set(activeCourses.map(c => c.term).filter(Boolean))];
+
+                document.getElementById('pill-courses').textContent     = activeCourses.length;
+                document.getElementById('pill-students').textContent    = totalStudents;
+                document.getElementById('pill-assessments').textContent = totalAssessments;
+                // avg completion set after grades load
+                document.getElementById('page-title').textContent       =
+                    `Grades & Charts${terms.length ? ' — ' + terms[0] : ''}`;
+                document.getElementById('export-label').textContent     =
+                    `Export completion data${terms.length ? ' for ' + terms[0] : ''}`;
+
+                // ── Deadline strip ──
+                const upcoming = allTemplates.filter(t => soonDeadline(t.due_date));
+                if (upcoming.length) {
+                    const names = upcoming.map(t => `${t._course.course_code} ${t.assessment_name}`).join(' and ');
+                    document.getElementById('deadline-text').innerHTML =
+                        `<strong>${upcoming.length} assessment${upcoming.length > 1 ? 's' : ''}</strong> ` +
+                        `ha${upcoming.length > 1 ? 've' : 's'} deadlines within the next 48 hours — ${names}.`;
+                    document.getElementById('deadline-strip').style.display = '';
+                }
+
+                // ── Course tabs ──
+                const tabsEl = document.getElementById('course-tabs');
+                activeCourses.forEach(c => {
+                    const a = document.createElement('a');
+                    a.href        = `#course-${c.id}`;
+                    a.className   = 'CourseTab';
+                    a.dataset.filter = String(c.id);
+                    a.textContent = c.course_code;
+                    tabsEl.appendChild(a);
+                });
+
+                // Tab click — show/hide sections
+                tabsEl.addEventListener('click', e => {
+                    const tab = e.target.closest('.CourseTab');
+                    if (!tab) return;
+                    e.preventDefault();
+                    tabsEl.querySelectorAll('.CourseTab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const filter = tab.dataset.filter;
+                    document.querySelectorAll('.CourseSection').forEach(sec => {
+                        sec.style.display = (filter === 'all' || sec.dataset.courseId === filter) ? '' : 'none';
+                    });
+                    document.querySelectorAll('.SectionDivider').forEach(d => d.style.display = filter === 'all' ? '' : 'none');
+                });
+
+                // ── Course sections — fetch real grades ──
+                const container = document.getElementById('courses-container');
+
+                if (!activeCourses.length) {
+                    container.innerHTML = `<p class="empty-state">No active courses found.</p>`;
+                    return;
+                }
+
+                // Fetch grades summary for all active courses in parallel
+                const gradesResults = await Promise.all(
+                    activeCourses.map(c =>
+                        fetch(`${API}/grades/${c.id}/all`)
+                            .then(r => r.json())
+                            .catch(() => [])
+                    )
+                );
+
+                // Build lookup: courseId -> { assessmentName -> {submissions, avg_pct} }
+                const gradesMap = {};
+                activeCourses.forEach((c, i) => {
+                    gradesMap[c.id] = {};
+                    (gradesResults[i] || []).forEach(g => {
+                        gradesMap[c.id][g.assessment_name.toLowerCase()] = g;
+                    });
+                });
+
+                let totalPct = 0, totalBars = 0;
+
+                container.innerHTML = activeCourses.map((c, idx) => {
+                    const templates = allTemplates.filter(t => t._course.id === c.id);
+                    const courseGrades = gradesMap[c.id] || {};
+
+                    const barsHTML = templates.length
+                        ? templates.map(t => {
+                            const gradeData = courseGrades[t.assessment_name.toLowerCase()];
+                            const pct  = gradeData ? Math.min(100, parseFloat(gradeData.avg_pct) || 0) : 0;
+                            const submissions = gradeData ? gradeData.submissions : 0;
+                            const info = statusInfo(pct);
+                            const due  = fmtDate(t.due_date);
+                            totalPct += pct; totalBars++;
+                            return `
+                                <div class="AssessmentBar">
+                                    <div class="BarTopRow">
+                                        <span class="BarName">
+                                            ${t.assessment_name}
+                                            <span class="BarCategory">${t.category || ''}</span>
+                                            ${due ? `<span style="font-size:11px;opacity:0.5;margin-left:6px;">Due ${due}</span>` : ''}
+                                        </span>
+                                        <div class="BarMeta">
+                                            <span class="StatusBadge ${info.cls}">${info.label}</span>
+                                            <span class="BarPercent">${pct}%</span>
+                                            <span class="BarCount">${submissions} submission${submissions !== 1 ? 's' : ''}</span>
+                                        </div>
+                                    </div>
+                                    <div class="BarTrack">
+                                        <div class="BarFill ${info.fillCls}" style="width:${pct}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                          }).join('')
+                        : `<p class="empty-state">No assessments added yet for this course.</p>`;
+
+
+                    const divider = idx < activeCourses.length - 1
+                        ? `<hr class="SectionDivider" />`
+                        : '';
+
+                    return `
+                        <div class="CourseSection" id="course-${c.id}" data-course-id="${c.id}">
+                            <div class="CourseSectionHeader">
+                                <span class="CourseCodeBadge ${badgeClass(c.course_code)}">${c.course_code}</span>
+                                <div>
+                                    <h4>${c.course_name}</h4>
+                                    <p>${c.max_students} students enrolled</p>
+                                </div>
+                            </div>
+                            ${barsHTML}
+                        </div>
+                        ${divider}
+                    `;
+                }).join('');
+
+                // ── Update avg completion pill ──
+                const avgCompletion = totalBars > 0 ? Math.round(totalPct / totalBars) : 0;
+                document.getElementById('pill-weight').textContent = avgCompletion + '%';
+
+                // ── CSV Export ──
+                document.getElementById('btn-csv').addEventListener('click', e => {
+                    e.preventDefault();
+                    const rows = [['Course Code', 'Course Name', 'Assessment', 'Category', 'Weight (%)', 'Due Date']];
+                    allTemplates.forEach(t => {
+                        rows.push([
+                            t._course.course_code,
+                            t._course.course_name,
+                            t.assessment_name,
+                            t.category || '',
+                            t.weight || 0,
+                            fmtDate(t.due_date) || ''
+                        ]);
+                    });
+                    const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url  = URL.createObjectURL(blob);
+                    const a    = document.createElement('a');
+                    a.href     = url;
+                    a.download = 'analytics_export.csv';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+
+            } catch (err) {
+                document.getElementById('courses-container').innerHTML =
+                    `<p style="color:#ff8fa3;text-align:center;padding:30px;">❌ Cannot connect to server. Is it running?</p>`;
+                console.error(err);
+            }
+        }
+
+        // ── Track visit for dashboard recent pages ──
+        (function() {
+            let h = JSON.parse(localStorage.getItem('scc_page_history') || '[]');
+            h = ['Analyticss.html', ...h.filter(p => p !== 'Analyticss.html')].slice(0, 10);
+            localStorage.setItem('scc_page_history', JSON.stringify(h));
+        })();
+
+        loadAnalytics();
+    </script>
 
     </body>
 </html>

@@ -140,4 +140,22 @@ router.get('/gpa/all', (req, res) => {
     );
 });
 
+// GET all grades for a course (admin view — all students)
+router.get('/:courseId/all', (req, res) => {
+    const { courseId } = req.params;
+    db.query(
+        `SELECT assessment_name, category,
+            COUNT(*) as submissions,
+            ROUND(AVG(earned_marks / total_marks * 100), 1) as avg_pct
+         FROM student_grades
+         WHERE course_id = ? AND earned_marks IS NOT NULL
+         GROUP BY assessment_name, category`,
+        [courseId],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
 module.exports = router;
