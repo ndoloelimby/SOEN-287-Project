@@ -25,6 +25,41 @@ function escapeHtml(value) {
         .replaceAll("'", '&#39;');
 }
 
+function ensureFeedbackBox() {
+    let feedback = document.getElementById('detailsFeedback');
+    if (feedback) return feedback;
+
+    const assessments = document.querySelector('.assessments');
+    const heading = assessments ? assessments.querySelector('h2') : null;
+
+    feedback = document.createElement('div');
+    feedback.id = 'detailsFeedback';
+    feedback.className = 'details-feedback';
+    feedback.hidden = true;
+
+    if (heading) {
+        heading.insertAdjacentElement('afterend', feedback);
+    } else if (assessments) {
+        assessments.prepend(feedback);
+    }
+
+    return feedback;
+}
+
+function showFeedback(message, type = 'error') {
+    const feedback = ensureFeedbackBox();
+    feedback.textContent = message;
+    feedback.className = `details-feedback ${type}`;
+    feedback.hidden = false;
+}
+
+function clearFeedback() {
+    const feedback = ensureFeedbackBox();
+    feedback.hidden = true;
+    feedback.textContent = '';
+    feedback.className = 'details-feedback';
+}
+
 async function fetchJson(url, options) {
     const response = await fetch(url, options);
     const payload = await response.json().catch(() => ({}));
@@ -83,6 +118,7 @@ async function loadAssessments() {
     if (!courseId) return;
 
     try {
+        clearFeedback();
         const grades = await fetchJson(`${API}/${courseId}/details`);
         const tbody = document.getElementById('gradesBody');
         tbody.innerHTML = '';
@@ -104,6 +140,7 @@ async function loadAssessments() {
         await loadAverage(courseId);
     } catch (error) {
         const tbody = document.getElementById('gradesBody');
+        showFeedback(`Could not load assessments: ${error.message}`);
         tbody.innerHTML = `
             <tr>
                 <td colspan="9" style="text-align:center; color:#a22;">
@@ -176,12 +213,45 @@ function buildPayloadFromRow(row, courseId) {
     return payload;
 }
 
+function getCurrentWeightTotal(excludedRowId = null) {
+    const rows = Array.from(document.querySelectorAll('#gradesBody tr[id^="row-"]'));
+
+    return rows.reduce((sum, row) => {
+        const rowId = row.id.replace('row-', '');
+        if (excludedRowId !== null && String(rowId) === String(excludedRowId)) {
+            return sum;
+        }
+
+        const weightInput = row.querySelector('.js-weight');
+        if (!weightInput || weightInput.value === '') {
+            return sum;
+        }
+
+        const weight = Number(weightInput.value);
+        return Number.isFinite(weight) ? sum + weight : sum;
+    }, 0);
+}
+
+function validateWeightTotal(nextWeight, excludedRowId = null) {
+    const courseWeight = getCurrentWeightTotal(excludedRowId);
+    const proposedWeight = nextWeight ?? 0;
+    const nextTotal = courseWeight + proposedWeight;
+
+    if (nextTotal > 100) {
+        throw new Error(
+            `Total weight for this course cannot exceed 100%. This change would bring it to ${nextTotal.toFixed(2)}%.`
+        );
+    }
+}
+
 async function saveRow(id) {
     const row = document.getElementById(`row-${id}`);
     const courseId = getCourseId();
 
     try {
+        clearFeedback();
         const payload = buildPayloadFromRow(row, courseId);
+        validateWeightTotal(payload.weight, id);
 
         await fetchJson(`${API}/${id}`, {
             method: 'PUT',
@@ -191,7 +261,7 @@ async function saveRow(id) {
 
         await loadAssessments();
     } catch (error) {
-        alert(error.message);
+        showFeedback(error.message);
     }
 }
 
@@ -199,10 +269,11 @@ async function deleteRow(id) {
     if (!confirm('Are you sure you want to delete this assessment?')) return;
 
     try {
+        clearFeedback();
         await fetchJson(`${API}/${id}`, { method: 'DELETE' });
         await loadAssessments();
     } catch (error) {
-        alert(error.message);
+        showFeedback(error.message);
     }
 }
 
@@ -210,6 +281,7 @@ async function addAssessment() {
     const courseId = getCourseId();
 
     try {
+        clearFeedback();
         const payload = {
             course_id: courseId,
             assessment_name: document.getElementById('newName').value.trim(),
@@ -239,6 +311,8 @@ async function addAssessment() {
             throw new Error('Total marks must be greater than 0.');
         }
 
+        validateWeightTotal(payload.weight);
+
         await fetchJson(API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -248,7 +322,7 @@ async function addAssessment() {
         closeModal();
         await loadAssessments();
     } catch (error) {
-        alert(error.message);
+        showFeedback(error.message);
     }
 }
 

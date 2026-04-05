@@ -143,6 +143,7 @@ router.get('/dashboard', (req, res) => {
             a.description,
             a.due_date,
             a.weight,
+            a.created_at AS assessment_created_at,
             COALESCE(g.status, 'pending') AS status,
             g.earned_marks,
             g.total_marks
@@ -166,3 +167,4 @@ router.get('/dashboard', (req, res) => {
 });
 
 module.exports = router;
+

@@ -504,3 +504,89 @@ body {
     font-size: 14px;
     text-align: center;
 }
+
+.calendar-container.week-table,
+.calendar.month-table {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(45, 27, 110, 0.16);
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 18px 28px -18px rgba(45, 27, 110, 0.35);
+    backdrop-filter: blur(10px);
+}
+
+.calendar-column-header {
+    padding: 14px 16px;
+    background: rgba(45, 27, 110, 0.82);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.week-table > :nth-child(7n),
+.month-table > :nth-child(7n) {
+    border-right: none;
+}
+
+.week-table .day-card,
+.month-table .day-card {
+    min-height: 240px;
+    padding: 14px 12px 12px;
+    border-top: 1px solid rgba(45, 27, 110, 0.14);
+    border-right: 1px solid rgba(45, 27, 110, 0.14);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.34);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.month-table .day-card {
+    min-height: 150px;
+}
+
+.empty-day {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.calendar-date-label {
+    align-self: flex-start;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d1b6e;
+}
+
+.today .calendar-date-label {
+    background: rgba(106, 79, 207, 0.18);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.week-table .assignment,
+.month-table .assignment {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 0;
+    border-radius: 10px;
+}
+
+.month-table .assignment {
+    padding: 6px 8px;
+}
+
+.month-table .assignment-title {
+    font-size: 11px;
+}
+
+.month-table .assignment-course,
+.month-table .assignment-weight {
+    font-size: 10px;
+}
