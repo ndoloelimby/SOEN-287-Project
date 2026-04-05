@@ -590,3 +590,35 @@ body {
 .month-table .assignment-weight {
     font-size: 10px;
 }
+
+.deadline-item {
+    padding: 18px 20px;
+}
+
+.deadline-empty {
+    padding: 20px 18px;
+}
+
+.deadline-item {
+    padding: 20px 22px;
+    gap: 10px;
+}
+
+.deadline-top-row {
+    gap: 14px;
+}
+
+.deadline-bottom-row {
+    margin-top: 4px;
+}
+
+.deadline-pill {
+    padding: 6px 12px;
+}
+
+.deadline-top-row,
+.deadline-title,
+.deadline-bottom-row {
+    padding-left: 8px;
+    padding-right: 8px;
+}
