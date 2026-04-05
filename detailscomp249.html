@@ -57,9 +57,11 @@
                 <th>Name</th>
                 <th>Type</th>
                 <th>Due</th>
+                <th>Weight</th>
                 <th>Earned</th>
                 <th>Total</th>
                 <th>Status</th>
+                <th>Result</th>
                 <th>Actions</th>
             </tr>
             <tbody id="gradesBody">
@@ -103,8 +105,15 @@
                 border:1px solid #ccc;"><br>
 
             <label>Earned Marks</label><br>
-            <input id="newEarned" type="number"
+            <input id="newEarned" type="number" 
                 placeholder="Leave empty if not graded yet"
+                style="width:100%; margin-bottom:10px; 
+                padding:8px; border-radius:8px; 
+                border:1px solid #ccc;"><br>
+
+            <label>Weight (%)</label><br>
+            <input id="newWeight" type="number"
+                placeholder="Assessment ponderation"
                 style="width:100%; margin-bottom:10px;
                 padding:8px; border-radius:8px;
                 border:1px solid #ccc;"><br>

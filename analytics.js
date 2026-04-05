@@ -1,13 +1,12 @@
 const API = 'http://localhost:3000/api/grades';
 
 const COURSE_IDS = {
-    'comp249': 2,
-    'soen287': 1,
-    'engr233': 3,
-    'soen228': 4
+    comp249: 2,
+    soen287: 1,
+    engr233: 3,
+    soen228: 4
 };
 
-// Convert percentage to GPA
 function toGPA(avg) {
     if (avg >= 90) return 4.3;
     if (avg >= 85) return 4.0;
@@ -21,7 +20,6 @@ function toGPA(avg) {
     return 0.0;
 }
 
-// Get course from URL
 function getCourseId() {
     const page = window.location.pathname.toLowerCase();
     if (page.includes('comp249')) return COURSE_IDS.comp249;
@@ -31,55 +29,101 @@ function getCourseId() {
     return null;
 }
 
-// Load individual course analytics page
+function getProgressPercentage(data) {
+    if (!data.total_weight) {
+        return data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+    }
+
+    return Math.round((data.completed_weight / data.total_weight) * 100);
+}
+
+function updateRing(ring, value, label) {
+    if (!ring) return;
+    ring.style.setProperty('--p', String(value));
+    const center = ring.querySelector('.ring-center');
+    if (center) center.textContent = label;
+}
+
+function setAnalyticsError(message) {
+    const content = document.querySelector('.content');
+    if (!content) return;
+
+    const existing = content.querySelector('.analytics-error');
+    if (existing) existing.remove();
+
+    const error = document.createElement('p');
+    error.className = 'analytics-error';
+    error.textContent = message;
+    error.style.color = '#a22';
+    error.style.fontWeight = '600';
+    content.prepend(error);
+}
+
+async function fetchAnalytics(courseId) {
+    const response = await fetch(`${API}/${courseId}/analytics`);
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Could not load analytics.');
+    }
+
+    return data;
+}
+
 async function loadCourseAnalytics() {
     const courseId = getCourseId();
     if (!courseId) return;
 
-    const res = await fetch(`${API}/${courseId}/analytics`);
-    const data = await res.json();
+    try {
+        const data = await fetchAnalytics(courseId);
+        const average = Number(data.average || 0);
+        const gpa = toGPA(average);
+        const completionPercent = getProgressPercentage(data);
 
-    // Update average ring
-    const avgEl = document.getElementById('averageValue');
-    if (avgEl) avgEl.textContent = data.average + '%';
+        const averageRing = document.getElementById('averageRing');
+        const gpaRing = document.getElementById('gpaRing');
+        const completionRing = document.querySelector('.stat-card:nth-of-type(2) .ring');
+        const completionValue = document.getElementById('completionValue');
+        const trendContainer = document.getElementById('trendBars');
 
-    const avgRing = document.getElementById('averageRing');
-    if (avgRing) avgRing.style.setProperty('--p', data.average);
+        updateRing(averageRing, average, `${average.toFixed(2)}%`);
+        updateRing(gpaRing, ((gpa / 4.3) * 100).toFixed(0), gpa.toFixed(1));
+        updateRing(completionRing, completionPercent, `${completionPercent}%`);
 
-    // Update GPA
-    const gpa = toGPA(parseFloat(data.average));
-    const gpaEl = document.getElementById('gpaValue');
-    if (gpaEl) gpaEl.textContent = gpa + ' / 4.3';
+        if (completionValue) {
+            completionValue.textContent = `${data.completed} / ${data.total}`;
+        }
 
-    const gpaRing = document.getElementById('gpaRing');
-    if (gpaRing) gpaRing.style.setProperty('--p', 
-        ((gpa / 4.3) * 100).toFixed(0));
+        if (trendContainer) {
+            const completedAssessments = data.assessments.filter(
+                (assessment) => assessment.percentage !== null
+            );
 
-    // Update completion
-    const compEl = document.getElementById('completionValue');
-    if (compEl) compEl.textContent = 
-        `${data.completed} / ${data.total}`;
+            if (!completedAssessments.length) {
+                trendContainer.innerHTML = `
+                    <p style="opacity:0.5;">No graded assessments yet.</p>
+                `;
+                return;
+            }
 
-    // Update performance trend bars
-    const trendContainer = document.getElementById('trendBars');
-    if (trendContainer && data.assessments.length > 0) {
-        trendContainer.innerHTML = '';
-        data.assessments.forEach(a => {
-            trendContainer.innerHTML += `
-                <div class="trend-row">
-                    <span>${a.assessment_name}</span>
-                    <div class="trend-bar-wrap">
-                        <div class="trend-bar" 
-                            style="width:${a.percentage}%;">
+            trendContainer.innerHTML = completedAssessments.map((assessment) => {
+                const weightLabel = assessment.weight !== null ? `${assessment.weight}%` : 'No weight';
+                return `
+                    <div class="trend-row">
+                        <span>${assessment.assessment_name} (${weightLabel})</span>
+                        <div class="trend-bar-wrap">
+                            <div class="trend-bar" style="width:${assessment.percentage}%;"></div>
                         </div>
+                        <span>${assessment.percentage}%</span>
                     </div>
-                    <span>${a.percentage}%</span>
-                </div>`;
-        });
+                `;
+            }).join('');
+        }
+    } catch (error) {
+        setAnalyticsError(error.message);
     }
 }
 
-// Load summary analytics page (analytics.html)
 async function loadSummaryAnalytics() {
     const courses = [
         { id: 1, name: 'SOEN 287', key: 'soen287' },
@@ -89,38 +133,33 @@ async function loadSummaryAnalytics() {
     ];
 
     for (const course of courses) {
-        const res = await fetch(`${API}/${course.id}/analytics`);
-        const data = await res.json();
-        const gpa = toGPA(parseFloat(data.average));
+        try {
+            const data = await fetchAnalytics(course.id);
+            const average = Number(data.average || 0);
+            const gpa = toGPA(average);
 
-        // Update average ring
-        const avgRing = document.getElementById(
-            `avg-ring-${course.key}`);
-        if (avgRing) {
-            avgRing.style.setProperty('--p', data.average);
-            const span = avgRing.querySelector('.ring-center');
-            if (span) span.textContent = data.average + '%';
+            updateRing(
+                document.getElementById(`avg-ring-${course.key}`),
+                average,
+                `${average.toFixed(2)}%`
+            );
+
+            updateRing(
+                document.getElementById(`gpa-ring-${course.key}`),
+                ((gpa / 4.3) * 100).toFixed(0),
+                gpa.toFixed(1)
+            );
+
+            const completion = document.getElementById(`comp-${course.key}`);
+            if (completion) {
+                completion.textContent = `Completed ${data.completed} / ${data.total}`;
+            }
+        } catch (error) {
+            setAnalyticsError(`Could not load ${course.name}: ${error.message}`);
         }
-
-        // Update GPA ring
-        const gpaRing = document.getElementById(
-            `gpa-ring-${course.key}`);
-        if (gpaRing) {
-            gpaRing.style.setProperty('--p', 
-                ((gpa / 4.3) * 100).toFixed(0));
-            const span = gpaRing.querySelector('.ring-center');
-            if (span) span.textContent = gpa;
-        }
-
-        // Update completion text
-        const compEl = document.getElementById(
-            `comp-${course.key}`);
-        if (compEl) compEl.textContent = 
-            `Completed ${data.completed} / ${data.total}`;
     }
 }
 
-// Decide which function to run based on page
 window.onload = () => {
     const page = window.location.pathname.toLowerCase();
     if (page.includes('analytics-')) {
@@ -130,15 +169,12 @@ window.onload = () => {
     }
 };
 
-// Export functions
 function exportCSV() {
     const courseId = getCourseId();
-    window.location.href = 
-        `${API}/${courseId}/export/csv`;
+    window.location.href = `${API}/${courseId}/export/csv`;
 }
 
 function exportPDF() {
     const courseId = getCourseId();
-    window.location.href = 
-        `${API}/${courseId}/export/pdf`;
+    window.location.href = `${API}/${courseId}/export/pdf`;
 }

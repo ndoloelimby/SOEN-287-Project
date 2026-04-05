@@ -360,10 +360,30 @@ body {
     font-size: 12px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-shrink: 0;               /* prevent shrinking in flex-wrap */
     margin-bottom: 4px;
-    min-width: 120px;              /* ensure neat wrapping into columns */
+    min-width: 140px;              /* ensure neat wrapping into columns */
+    gap: 8px;
+}
+
+.assignment-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.assignment-title {
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.assignment-course,
+.assignment-weight {
+    font-size: 11px;
+    line-height: 1.2;
 }
 
 /* Done button inside assignment */
@@ -383,3 +403,4 @@ body {
     opacity: 0.6;
     text-decoration: line-through;
 }
+

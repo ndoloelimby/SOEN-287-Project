@@ -4,13 +4,15 @@ const db = require('../db');
 const PDFDocument = require('pdfkit');
 const { Parser } = require('json2csv');
 
+const getStudentId = () => 1; // temporary until auth is ready
+
 // GET all grades for a course
 router.get('/:courseId', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1;
+    const studentId = getStudentId();
 
     db.query(
-        'SELECT * FROM student_grades WHERE course_id = ? AND student_id = ?',
+        'SELECT * FROM student_grades WHERE course_id = ? AND student_id = ? ORDER BY due_date IS NULL, due_date ASC, created_at ASC, id ASC',
         [courseId, studentId],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -19,19 +21,64 @@ router.get('/:courseId', (req, res) => {
     );
 });
 
-// ADD a new grade
-router.post('/', (req, res) => {
-    const studentId = 1;
-    const { course_id, assessment_name, category, 
-            due_date, earned_marks, total_marks, status } = req.body;
+// GET student-entered assessments for a course details page
+router.get('/:courseId/details', (req, res) => {
+    const { courseId } = req.params;
+    const studentId = getStudentId();
 
     db.query(
-        `INSERT INTO student_grades 
-        (student_id, course_id, assessment_name, category, 
-        due_date, earned_marks, total_marks, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [studentId, course_id, assessment_name, category,
-        due_date, earned_marks, total_marks, status],
+        `SELECT
+            id AS grade_id,
+            course_id,
+            assessment_id,
+            assessment_name,
+            category,
+            due_date,
+            weight,
+            earned_marks,
+            total_marks,
+            status
+        FROM student_grades
+        WHERE student_id = ? AND course_id = ?
+        ORDER BY due_date IS NULL, due_date ASC, created_at ASC, id ASC`,
+        [studentId, courseId],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
+// ADD a new student-owned assessment
+router.post('/', (req, res) => {
+    const studentId = getStudentId();
+    const {
+        course_id,
+        assessment_name,
+        category,
+        due_date,
+        weight,
+        earned_marks,
+        total_marks,
+        status
+    } = req.body;
+
+    db.query(
+        `INSERT INTO student_grades
+        (student_id, course_id, assessment_name, category,
+        due_date, weight, earned_marks, total_marks, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [
+            studentId,
+            course_id,
+            assessment_name,
+            category,
+            due_date || null,
+            weight ?? null,
+            earned_marks ?? null,
+            total_marks ?? null,
+            status || 'pending'
+        ],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ message: 'Grade added!', id: result.insertId });
@@ -42,18 +89,39 @@ router.post('/', (req, res) => {
 // EDIT a grade
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { assessment_name, category, due_date, 
-            earned_marks, total_marks, status } = req.body;
+    const {
+        assessment_name,
+        category,
+        due_date,
+        weight,
+        earned_marks,
+        total_marks,
+        status
+    } = req.body;
 
     db.query(
-        `UPDATE student_grades SET 
+        `UPDATE student_grades SET
         assessment_name = ?, category = ?, due_date = ?,
-        earned_marks = ?, total_marks = ?, status = ?
-        WHERE id = ?`,
-        [assessment_name, category, due_date,
-        earned_marks, total_marks, status, id],
-        (err) => {
+        weight = ?, earned_marks = ?, total_marks = ?, status = ?,
+        updated_at = NOW()
+        WHERE id = ? AND student_id = ?`,
+        [
+            assessment_name,
+            category,
+            due_date || null,
+            weight ?? null,
+            earned_marks ?? null,
+            total_marks ?? null,
+            status,
+            id,
+            getStudentId()
+        ],
+        (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Grade not found' });
+            }
+
             res.json({ message: 'Grade updated!' });
         }
     );
@@ -64,50 +132,73 @@ router.delete('/:id', (req, res) => {
     const { id } = req.params;
 
     db.query(
-        'DELETE FROM student_grades WHERE id = ?',
-        [id],
-        (err) => {
+        'DELETE FROM student_grades WHERE id = ? AND student_id = ?',
+        [id, getStudentId()],
+        (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'Grade not found' });
+            }
+
             res.json({ message: 'Grade deleted!' });
         }
     );
 });
 
-// GET average for a course
+// GET weighted average for a course
 router.get('/:courseId/average', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1;
+    const studentId = getStudentId();
 
     db.query(
-        `SELECT 
-            SUM(earned_marks) as total_earned,
-            SUM(total_marks) as total_possible,
-            ROUND((SUM(earned_marks) / SUM(total_marks)) * 100, 2) 
-            as average
-        FROM student_grades 
+        `SELECT
+            weight,
+            earned_marks,
+            total_marks
+        FROM student_grades
         WHERE course_id = ? AND student_id = ?
-        AND earned_marks IS NOT NULL`,
+        AND earned_marks IS NOT NULL
+        AND total_marks IS NOT NULL
+        AND total_marks <> 0`,
         [courseId, studentId],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json(results[0]);
+
+            const weightedPoints = results.reduce((sum, row) => {
+                const weight = parseFloat(row.weight || 0);
+                const percentage = (parseFloat(row.earned_marks) / parseFloat(row.total_marks)) * 100;
+                return sum + ((percentage / 100) * weight);
+            }, 0);
+
+            const totalWeight = results.reduce(
+                (sum, row) => sum + parseFloat(row.weight || 0),
+                0
+            );
+
+            const average = totalWeight > 0
+                ? Number((((weightedPoints / totalWeight) * 100).toFixed(2)))
+                : 0;
+
+            res.json({ average, total_weight: Number(totalWeight.toFixed(2)) });
         }
     );
 });
 
 // GET GPA across all courses
 router.get('/gpa/all', (req, res) => {
-    const studentId = 1;
+    const studentId = getStudentId();
 
     db.query(
-        `SELECT 
+        `SELECT
             course_id,
-            ROUND((SUM(earned_marks) / SUM(total_marks)) * 100, 2) 
-            as average
-        FROM student_grades 
+            weight,
+            earned_marks,
+            total_marks
+        FROM student_grades
         WHERE student_id = ?
         AND earned_marks IS NOT NULL
-        GROUP BY course_id`,
+        AND total_marks IS NOT NULL
+        AND total_marks <> 0`,
         [studentId],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -125,18 +216,37 @@ router.get('/gpa/all', (req, res) => {
                 return 0.0;
             };
 
-            const gpaResults = results.map(r => ({
-                course_id: r.course_id,
-                average: r.average,
-                gpa: gpaScale(r.average)
-            }));
+            const grouped = results.reduce((acc, row) => {
+                const key = row.course_id;
+                const weight = parseFloat(row.weight || 0);
+                const percentage = (parseFloat(row.earned_marks) / parseFloat(row.total_marks)) * 100;
 
-            const overallGpa = gpaResults.length > 0
-                ? (gpaResults.reduce((sum, r) => 
-                    sum + r.gpa, 0) / gpaResults.length).toFixed(2)
+                if (!acc[key]) {
+                    acc[key] = { weightedPoints: 0, totalWeight: 0 };
+                }
+
+                acc[key].weightedPoints += (percentage / 100) * weight;
+                acc[key].totalWeight += weight;
+                return acc;
+            }, {});
+
+            const courses = Object.entries(grouped).map(([courseId, data]) => {
+                const average = data.totalWeight > 0
+                    ? Number((((data.weightedPoints / data.totalWeight) * 100).toFixed(2)))
+                    : 0;
+
+                return {
+                    course_id: Number(courseId),
+                    average,
+                    gpa: gpaScale(average)
+                };
+            });
+
+            const overallGpa = courses.length > 0
+                ? Number((courses.reduce((sum, course) => sum + course.gpa, 0) / courses.length).toFixed(2))
                 : 0;
 
-            res.json({ courses: gpaResults, overall_gpa: overallGpa });
+            res.json({ courses, overall_gpa: overallGpa });
         }
     );
 });
@@ -144,6 +254,7 @@ router.get('/gpa/all', (req, res) => {
 // GET all grades for a course (admin view)
 router.get('/:courseId/all', (req, res) => {
     const { courseId } = req.params;
+
     db.query(
         `SELECT assessment_name, category,
             COUNT(*) as submissions,
@@ -162,33 +273,71 @@ router.get('/:courseId/all', (req, res) => {
 // GET analytics data for a course
 router.get('/:courseId/analytics', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1;
+    const studentId = getStudentId();
 
     db.query(
-        `SELECT 
+        `SELECT
+            id,
             assessment_name,
             category,
+            due_date,
+            weight,
             earned_marks,
             total_marks,
             status,
-            ROUND((earned_marks / total_marks) * 100, 2) 
-            as percentage
+            CASE
+                WHEN earned_marks IS NOT NULL
+                    AND total_marks IS NOT NULL
+                    AND total_marks <> 0
+                THEN ROUND((earned_marks / total_marks) * 100, 2)
+                ELSE NULL
+            END as percentage
         FROM student_grades
         WHERE course_id = ? AND student_id = ?
-        AND earned_marks IS NOT NULL
-        ORDER BY created_at ASC`,
+        ORDER BY due_date IS NULL, due_date ASC, created_at ASC, id ASC`,
         [courseId, studentId],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
 
-            const completed = results.length;
-            const total = completed;
-            const average = results.length > 0
-                ? (results.reduce((sum, r) => 
-                    sum + parseFloat(r.percentage), 0) / results.length).toFixed(2)
-                : 0;
+            const assessments = results.map((row) => ({
+                ...row,
+                weight: row.weight === null ? null : parseFloat(row.weight),
+                earned_marks: row.earned_marks === null ? null : parseFloat(row.earned_marks),
+                total_marks: row.total_marks === null ? null : parseFloat(row.total_marks),
+                percentage: row.percentage === null ? null : parseFloat(row.percentage)
+            }));
 
-            res.json({ assessments: results, average, completed, total });
+            const completedAssessments = assessments.filter(
+                (assessment) => assessment.percentage !== null
+            );
+
+            const weightedPoints = completedAssessments.reduce((sum, assessment) => {
+                const weight = assessment.weight || 0;
+                return sum + ((assessment.percentage / 100) * weight);
+            }, 0);
+
+            const completedWeight = completedAssessments.reduce(
+                (sum, assessment) => sum + (assessment.weight || 0),
+                0
+            );
+
+            const totalWeight = assessments.reduce(
+                (sum, assessment) => sum + (assessment.weight || 0),
+                0
+            );
+
+            const average = completedWeight > 0
+                ? ((weightedPoints / completedWeight) * 100).toFixed(2)
+                : '0.00';
+
+            res.json({
+                assessments,
+                average,
+                completed: completedAssessments.length,
+                total: assessments.length,
+                completed_weight: Number(completedWeight.toFixed(2)),
+                total_weight: Number(totalWeight.toFixed(2))
+            });
         }
     );
 });
@@ -196,25 +345,24 @@ router.get('/:courseId/analytics', (req, res) => {
 // EXPORT to CSV
 router.get('/:courseId/export/csv', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1;
+    const studentId = getStudentId();
 
     db.query(
-        `SELECT 
-            assessment_name, category, due_date,
+        `SELECT
+            assessment_name, category, due_date, weight,
             earned_marks, total_marks,
-            ROUND((earned_marks / total_marks) * 100, 2) 
-            as percentage, status
+            ROUND((earned_marks / total_marks) * 100, 2) as percentage, status
         FROM student_grades
         WHERE course_id = ? AND student_id = ?`,
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ 
-                error: err.message });
+            if (err) return res.status(500).json({ error: err.message });
 
             const fields = [
                 { label: 'Assessment', value: 'assessment_name' },
                 { label: 'Category', value: 'category' },
                 { label: 'Due Date', value: 'due_date' },
+                { label: 'Weight', value: 'weight' },
                 { label: 'Earned', value: 'earned_marks' },
                 { label: 'Total', value: 'total_marks' },
                 { label: 'Percentage', value: 'percentage' },
@@ -234,23 +382,18 @@ router.get('/:courseId/export/csv', (req, res) => {
 // EXPORT to PDF
 router.get('/:courseId/export/pdf', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1;
+    const studentId = getStudentId();
 
     db.query(
-        `SELECT 
-            assessment_name, category, due_date,
+        `SELECT
+            assessment_name, category, due_date, weight,
             earned_marks, total_marks,
-            ROUND((earned_marks / total_marks) * 100, 2) 
-            as percentage, status,
-            ROUND((SUM(earned_marks) OVER()) / 
-            (SUM(total_marks) OVER()) * 100, 2) 
-            as overall_average
+            ROUND((earned_marks / total_marks) * 100, 2) as percentage, status
         FROM student_grades
         WHERE course_id = ? AND student_id = ?`,
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ 
-                error: err.message });
+            if (err) return res.status(500).json({ error: err.message });
 
             const doc = new PDFDocument({ margin: 40 });
 
@@ -260,20 +403,11 @@ router.get('/:courseId/export/pdf', (req, res) => {
 
             doc.fontSize(20)
                .fillColor('#2d1b6e')
-               .text('Smart Course Companion', 
-                    { align: 'center' });
+               .text('Smart Course Companion', { align: 'center' });
             doc.fontSize(14)
                .fillColor('#6a4fcf')
-               .text(`Grade Report — Course ${courseId}`, 
-                    { align: 'center' });
+               .text(`Grade Report - Course ${courseId}`, { align: 'center' });
             doc.moveDown();
-
-            if (results.length > 0) {
-                doc.fontSize(12)
-                   .fillColor('#000')
-                   .text(`Overall Average: ${results[0].overall_average}%`);
-                doc.moveDown();
-            }
 
             doc.fontSize(10)
                .fillColor('#ffffff')
@@ -282,28 +416,31 @@ router.get('/:courseId/export/pdf', (req, res) => {
 
             doc.fillColor('#ffffff')
                .text('Assessment', 45, doc.y - 15)
-               .text('Category', 180, doc.y - 15)
-               .text('Earned', 280, doc.y - 15)
-               .text('Total', 340, doc.y - 15)
-               .text('%', 400, doc.y - 15)
-               .text('Status', 450, doc.y - 15);
+               .text('Category', 160, doc.y - 15)
+               .text('Weight', 245, doc.y - 15)
+               .text('Earned', 305, doc.y - 15)
+               .text('Total', 365, doc.y - 15)
+               .text('%', 425, doc.y - 15)
+               .text('Status', 465, doc.y - 15);
 
             doc.moveDown();
 
-            results.forEach((g, i) => {
+            results.forEach((grade, index) => {
                 const y = doc.y;
-                if (i % 2 === 0) {
-                    doc.rect(40, y, 520, 20)
-                       .fill('#f0ebff');
+                if (index % 2 === 0) {
+                    doc.rect(40, y, 520, 20).fill('#f0ebff');
                 }
+
                 doc.fillColor('#000')
                    .fontSize(9)
-                   .text(g.assessment_name || '-', 45, y + 5)
-                   .text(g.category || '-', 180, y + 5)
-                   .text(g.earned_marks || '-', 280, y + 5)
-                   .text(g.total_marks || '-', 340, y + 5)
-                   .text(g.percentage || '-', 400, y + 5)
-                   .text(g.status || '-', 450, y + 5);
+                   .text(grade.assessment_name || '-', 45, y + 5)
+                   .text(grade.category || '-', 160, y + 5)
+                   .text(grade.weight ?? '-', 245, y + 5)
+                   .text(grade.earned_marks ?? '-', 305, y + 5)
+                   .text(grade.total_marks ?? '-', 365, y + 5)
+                   .text(grade.percentage ?? '-', 425, y + 5)
+                   .text(grade.status || '-', 465, y + 5);
+
                 doc.moveDown();
             });
 
