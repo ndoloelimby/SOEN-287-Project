@@ -68,6 +68,10 @@ body {
     color: inherit;
 }
 
+.navbar ul li.active {
+    background: rgba(106, 79, 207, 0.2);
+}
+
 .nav-icons {
     margin-left: auto;
     display: flex;
