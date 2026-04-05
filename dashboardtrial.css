@@ -375,6 +375,7 @@ body {
     padding: 3px 6px;
     cursor: pointer;
     font-size: 11px;
+    flex-shrink: 0;
 }
 
 /* Optional: mark done assignments visually */
