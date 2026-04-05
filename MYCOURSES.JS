@@ -1,159 +1,267 @@
+const API_BASE = 'http://localhost:3000/api/student';
 
-let courses = [
-  {name:"ENGR 233", color:"#ffffff", ID: "engr233", href: "detailsENGR233.html"},
-  {name:"SOEN 287", color:"#ffffff", ID: "soen287", href: "detailsSOEN287.html"},
-  {name:"SOEN 228", color:"#ffffff", ID: "soen228", href: "detailsSOEN228.html"},
+const detailPageByCourseCode = {
+  ENGR233: 'detailsENGR233.html',
+  SOEN287: 'detailsSOEN287.html',
+  SOEN228: 'detailsSOEN228.html',
+  COMP249: 'detailscomp249.html'
+};
 
-  {name:"COMP 249", color:"#ffffff", ID: "comp249", href: "detailscomp249.html"}
-];
-
-let archived = []; /*array for archive courses*/ 
-
+let courses = [];
+let archivedIds = new Set();
 let selectedAssignment = null;
 
-const container = document.getElementById("courseContainer");
-const archivedContainer = document.getElementById("archivedContainer");
+const container = document.getElementById('courseContainer');
+const archivedContainer = document.getElementById('archivedContainer');
+const enrollInput = document.getElementById('enrollCourseCode');
+const enrollButton = document.getElementById('enrollButton');
+const enrollmentMessage = document.getElementById('enrollmentMessage');
 
-function createCard(course, isArchived=false){
-  const card=document.createElement("div");
-  card.className="card";
-  card.style.background= "background: linear-gradient(135deg, #c4b0e8, #a8c4f5);";
+function normalizeCourseCode(value) {
+  return String(value || '').replace(/\s+/g, '').toUpperCase();
+}
 
-  card.innerHTML=`
-    <a href="${course.href}" class="card-header">
-        <span>${course.name}</span>
-    </a>
+function getCourseTitle(course) {
+  return course.course_code || course.course_name || 'Untitled Course';
+}
+
+function getCourseSubtitle(course) {
+  if (course.course_code && course.course_name) {
+    return course.course_name;
+  }
+
+  return course.term || '';
+}
+
+function getCourseHref(course) {
+  const normalized = normalizeCourseCode(course.course_code);
+  return detailPageByCourseCode[normalized] || '#';
+}
+
+function showEnrollmentMessage(message, type = '') {
+  enrollmentMessage.textContent = message;
+  enrollmentMessage.className = `enrollment-message${type ? ` ${type}` : ''}`;
+}
+
+function getVisibleCourses() {
+  return courses.filter((course) => !archivedIds.has(course.enrollment_id));
+}
+
+function getArchivedCourses() {
+  return courses.filter((course) => archivedIds.has(course.enrollment_id));
+}
+
+function createCard(course, isArchived = false) {
+  const card = document.createElement('div');
+  const courseHref = getCourseHref(course);
+  const subtitle = getCourseSubtitle(course);
+  const linkMarkup = courseHref === '#'
+    ? `<div class="card-header"><span>${getCourseTitle(course)}</span></div>`
+    : `<a href="${courseHref}" class="card-header"><span>${getCourseTitle(course)}</span></a>`;
+
+  card.className = 'card';
+  card.innerHTML = `
+    ${linkMarkup}
+    ${subtitle ? `<p class="card-subtitle">${subtitle}</p>` : ''}
     <div class="card-header">
       <div class="card-buttons">
-        ${isArchived 
-          ? '<button class="unarchive">Unhide</button>' 
+        ${isArchived
+          ? '<button class="unarchive">Unhide</button>'
           : '<button class="remove">Remove</button><button class="archive">Hide</button>'}
-      </div> 
-    </div> 
-    
-  `; 
+      </div>
+    </div>
+  `;
 
-  
-  
-
-  if(isArchived){
-    card.querySelector(".unarchive").onclick=()=>{
-      courses.push(course);
-      archived.splice(archived.indexOf(course),1);
+  if (isArchived) {
+    card.querySelector('.unarchive').onclick = () => {
+      archivedIds.delete(course.enrollment_id);
       renderAll();
     };
-  } else {
-    card.querySelector(".archive").onclick=()=>{
-      archived.push(course);
-      courses.splice(courses.indexOf(course),1);
-      renderAll(); 
-    };
-
-    card.querySelector(".remove").onclick=()=>{
-      courses.splice(courses.indexOf(course),1);
-      renderAll();
-    };
+    return card;
   }
+
+  card.querySelector('.archive').onclick = () => {
+    archivedIds.add(course.enrollment_id);
+    renderAll();
+  };
+
+  card.querySelector('.remove').onclick = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/enroll/${course.enrollment_id}`, {
+        method: 'DELETE'
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Could not remove enrollment');
+      }
+
+      archivedIds.delete(course.enrollment_id);
+      showEnrollmentMessage('Course removed from My Courses.', 'success');
+      await loadEnrollments();
+    } catch (error) {
+      showEnrollmentMessage(error.message, 'error');
+    }
+  };
 
   return card;
 }
 
-function renderAll(){
-  container.innerHTML="";
-  archivedContainer.innerHTML="";
-  courses.forEach(c=>container.appendChild(createCard(c,false)));
-  archived.forEach(c=>archivedContainer.appendChild(createCard(c,true)));
+function renderCourseNameList(items) {
+  container.innerHTML = '';
+
+  const ul = document.createElement('ul');
+  ul.style.listStyle = 'none';
+  ul.style.padding = '0';
+  ul.style.display = 'flex';
+  ul.style.flexDirection = 'column';
+  ul.style.gap = '10px';
+
+  items.forEach((course) => {
+    const li = document.createElement('li');
+    li.style.background = 'rgba(255,255,255,0.55)';
+    li.style.padding = '12px 16px';
+    li.style.borderRadius = '12px';
+    li.style.border = '1px solid rgba(150,120,220,0.3)';
+
+    const link = document.createElement(getCourseHref(course) === '#' ? 'span' : 'a');
+    if (link.tagName.toLowerCase() === 'a') {
+      link.href = getCourseHref(course);
+    }
+    link.textContent = getCourseTitle(course);
+    link.style.textDecoration = 'none';
+    link.style.color = '#2d1b6e';
+    link.style.fontWeight = 'bold';
+
+    li.appendChild(link);
+
+    if (course.course_name) {
+      const name = document.createElement('div');
+      name.textContent = course.course_name;
+      name.style.marginTop = '4px';
+      name.style.fontSize = '13px';
+      name.style.color = 'rgba(45, 27, 110, 0.75)';
+      li.appendChild(name);
+    }
+
+    ul.appendChild(li);
+  });
+
+  container.appendChild(ul);
 }
 
-renderAll();
+function renderAll() {
+  const selectedView = document.getElementById('sort').value;
+  const searchValue = document.getElementById('search').value.toLowerCase();
+  const visibleCourses = getVisibleCourses().filter((course) => {
+    const haystack = `${course.course_code || ''} ${course.course_name || ''}`.toLowerCase();
+    return haystack.includes(searchValue);
+  });
 
-document.getElementById("search").addEventListener("input",function(){
-  const value=this.value.toLowerCase();
-  container.innerHTML="";
-  courses
-    .filter(c=>c.name.toLowerCase().includes(value))
-    .forEach(c=>container.appendChild(createCard(c,false)));
-});
+  container.innerHTML = '';
+  archivedContainer.innerHTML = '';
 
-document.getElementById("sort").addEventListener("change", function(){
-  if(this.value === "name"){ 
-    container.innerHTML = "";
+  if (selectedView === 'name') {
+    renderCourseNameList(visibleCourses);
+  } else {
+    visibleCourses.forEach((course) => container.appendChild(createCard(course, false)));
+  }
 
-    const ul = document.createElement("ul");  // create a list
-    ul.style.listStyle = "none";               // optional: remove bullets
-    ul.style.padding = "0";
-    ul.style.display = "flex";
-    ul.style.flexDirection = "column";
-    ul.style.gap = "10px";
+  getArchivedCourses().forEach((course) => archivedContainer.appendChild(createCard(course, true)));
+}
 
-    courses.forEach(c => {
-      const li = document.createElement("li");
-      
-      li.style.background = "rgba(255,255,255,0.55)";
-      li.style.padding = "12px 16px";
-      li.style.borderRadius = "12px";
-      li.style.border = "1px solid rgba(150,120,220,0.3)";
+async function loadEnrollments() {
+  try {
+    const response = await fetch(`${API_BASE}/enrollments`);
+    const payload = await response.json();
 
+    if (!response.ok) {
+      throw new Error(payload.error || 'Could not load enrollments');
+    }
 
-      const link = document.createElement("a");
-    link.href = c.href;               // use the href from your course object
-    link.textContent = c.name;        // course name
-    link.style.textDecoration = "none";
-    link.style.color = "#2d1b6e";
-    link.style.fontWeight = "bold";
+    courses = payload;
+    renderAll();
+  } catch (error) {
+    courses = [];
+    renderAll();
+    showEnrollmentMessage(error.message, 'error');
+  }
+}
 
+async function enrollCourse() {
+  const courseCode = enrollInput.value.trim();
 
-       li.appendChild(link); // add link inside li
-      ul.appendChild(li);
+  try {
+    const response = await fetch(`${API_BASE}/enroll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ course_code: courseCode })
     });
 
-    container.appendChild(ul);
-  } else {
-    renderAll();
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || 'Could not enroll in course');
+    }
+
+    enrollInput.value = '';
+    showEnrollmentMessage(`Enrolled in ${payload.course?.course_code || courseCode}.`, 'success');
+    await loadEnrollments();
+  } catch (error) {
+    showEnrollmentMessage(error.message, 'error');
+  }
+}
+
+document.getElementById('search').addEventListener('input', renderAll);
+document.getElementById('sort').addEventListener('change', renderAll);
+document.getElementById('toggleArchived').onclick = () => {
+  archivedContainer.classList.toggle('hidden');
+};
+
+enrollButton.addEventListener('click', enrollCourse);
+enrollInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    enrollCourse();
   }
 });
 
-document.getElementById("toggleArchived").onclick=()=>{
-  archivedContainer.classList.toggle("hidden"); 
-};
-
-const calendarContainer = document.getElementById("calendarContainer");
+const calendarContainer = document.getElementById('calendarContainer');
 
 const assignmentsData = [
-  { title: "Assignment 1 - COMP249", dayOffset: 2 },
-  { title: "Design Diagram", dayOffset: 4 }
+  { title: 'Assignment 1 - COMP249', dayOffset: 2 },
+  { title: 'Design Diagram', dayOffset: 4 }
 ];
 
-function renderCalendar(view){
-  calendarContainer.innerHTML="";
-  const today=new Date();
+function renderCalendar(view) {
+  calendarContainer.innerHTML = '';
+  const today = new Date();
 
-  if(view==="today"){
-    const div=createDay(today);
+  if (view === 'today') {
+    const div = createDay(today);
     calendarContainer.appendChild(div);
   }
 
-  if(view==="week"){
-    const week=document.createElement("div");
-    week.className="calendar week";
+  if (view === 'week') {
+    const week = document.createElement('div');
+    week.className = 'calendar week';
 
-    for(let i=0;i<7;i++){
-      const date=new Date();
-      date.setDate(today.getDate()-today.getDay()+i);
+    for (let i = 0; i < 7; i += 1) {
+      const date = new Date();
+      date.setDate(today.getDate() - today.getDay() + i);
       week.appendChild(createDay(date));
     }
 
     calendarContainer.appendChild(week);
   }
 
-  if(view==="month"){
-    const month=document.createElement("div");
-    month.className="calendar month";
+  if (view === 'month') {
+    const month = document.createElement('div');
+    month.className = 'calendar month';
 
-    const days=new Date(today.getFullYear(), today.getMonth()+1,0).getDate();
+    const days = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 
-    for(let i=1;i<=days;i++){
-      const date=new Date(today.getFullYear(),today.getMonth(),i);
+    for (let i = 1; i <= days; i += 1) {
+      const date = new Date(today.getFullYear(), today.getMonth(), i);
       month.appendChild(createDay(date));
     }
 
@@ -161,24 +269,24 @@ function renderCalendar(view){
   }
 }
 
-function createDay(date){
-  const day=document.createElement("div");
-  day.className="day";
+function createDay(date) {
+  const day = document.createElement('div');
+  day.className = 'day';
 
-  if(date.toDateString()===new Date().toDateString()){
-    day.classList.add("today");
+  if (date.toDateString() === new Date().toDateString()) {
+    day.classList.add('today');
   }
 
-  day.innerHTML=`<h4>${date.toDateString()}</h4>`;
+  day.innerHTML = `<h4>${date.toDateString()}</h4>`;
 
-  assignmentsData.forEach(a=>{
-    const assignmentDate=new Date();
-    assignmentDate.setDate(assignmentDate.getDate()-assignmentDate.getDay()+a.dayOffset);
+  assignmentsData.forEach((assignmentItem) => {
+    const assignmentDate = new Date();
+    assignmentDate.setDate(assignmentDate.getDate() - assignmentDate.getDay() + assignmentItem.dayOffset);
 
-    if(date.toDateString()===assignmentDate.toDateString()){
-      const assignment=document.createElement("div");
-      assignment.className="assignment";
-      assignment.textContent=a.title;
+    if (date.toDateString() === assignmentDate.toDateString()) {
+      const assignment = document.createElement('div');
+      assignment.className = 'assignment';
+      assignment.textContent = assignmentItem.title;
       day.appendChild(assignment);
     }
   });
@@ -186,33 +294,38 @@ function createDay(date){
   return day;
 }
 
-renderCalendar("today");
+document.getElementById('todayTitle').textContent = 'Today';
+renderCalendar('today');
+loadEnrollments();
 
-document.getElementById("calendarView").onchange=(e)=>{
-  renderCalendar(e.target.value);
-};
+const calendarView = document.getElementById('calendarView');
+if (calendarView) {
+  calendarView.onchange = (event) => {
+    renderCalendar(event.target.value);
+  };
+}
 
-const modal=document.getElementById("modal");
-const modalTitle=document.getElementById("modalTitle");
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
 
-document.addEventListener("click",e=>{
-  if(e.target.classList.contains("assignment")){
-    selectedAssignment=e.target;
-    modal.style.display="flex";
-    modalTitle.textContent=e.target.textContent;
+document.addEventListener('click', (event) => {
+  if (event.target.classList.contains('assignment')) {
+    selectedAssignment = event.target;
+    modal.style.display = 'flex';
+    modalTitle.textContent = event.target.textContent;
   }
 });
 
-function closeModal(){
-  modal.style.display="none";
+function closeModal() {
+  modal.style.display = 'none';
 }
 
-function markDone(){
-  if(selectedAssignment){
-    selectedAssignment.classList.add("done");
+function markDone() {
+  if (selectedAssignment) {
+    selectedAssignment.classList.add('done');
   }
   closeModal();
 }
 
-
-
+window.closeModal = closeModal;
+window.markDone = markDone;

@@ -427,3 +427,80 @@ body {
 .calendar.month .day-card {
     padding-top: 26px;
 }
+
+.deadline-list {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+.deadline-item {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: grid;
+    gap: 10px;
+    backdrop-filter: blur(8px);
+}
+
+.deadline-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.deadline-course {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.deadline-date {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2d1b6e;
+    background: rgba(255, 255, 255, 0.78);
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.deadline-title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+}
+
+.deadline-bottom-row {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.deadline-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(45, 27, 110, 0.22);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.deadline-empty {
+    padding: 18px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 14px;
+    text-align: center;
+}

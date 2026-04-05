@@ -7,6 +7,7 @@ const monthBtn = document.getElementById("monthBtn");
 const monthSelect = document.getElementById("monthSelect");
 const yearSelect = document.getElementById("yearSelect");
 const monthControls = document.getElementById("monthControls");
+const upcomingDeadlinesList = document.getElementById("upcomingDeadlinesList");
 
 const today = new Date();
 
@@ -35,6 +36,22 @@ function formatWeight(weight) {
     return `Ponderation ${displayWeight}%`;
 }
 
+function formatDeadlineDate(date) {
+    return date.toLocaleDateString("en-CA", {
+        month: "short",
+        day: "numeric"
+    });
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 async function loadAssignments() {
     try {
         const response = await fetch(DASHBOARD_API);
@@ -56,11 +73,38 @@ async function loadAssignments() {
                     done: item.status === "completed"
                 };
             })
-            .filter(Boolean);
+            .filter(Boolean)
+            .sort((a, b) => a.date - b.date);
     } catch (error) {
         console.error("Failed to load dashboard assignments:", error);
         assignmentsData = [];
     }
+}
+
+function renderUpcomingDeadlines() {
+    if (!upcomingDeadlinesList) return;
+
+    const upcomingItems = assignmentsData.slice(0, 3);
+
+    if (upcomingItems.length === 0) {
+        upcomingDeadlinesList.innerHTML = `
+            <li class="deadline-empty">No assessments to show.</li>
+        `;
+        return;
+    }
+
+    upcomingDeadlinesList.innerHTML = upcomingItems.map((item) => `
+        <li class="deadline-item">
+            <div class="deadline-top-row">
+                <span class="deadline-course">${escapeHtml(item.courseName)}</span>
+                <span class="deadline-date">${escapeHtml(formatDeadlineDate(item.date))}</span>
+            </div>
+            <div class="deadline-title">${escapeHtml(item.title)}</div>
+            <div class="deadline-bottom-row">
+                <span class="deadline-pill">${escapeHtml(item.weightLabel)}</span>
+            </div>
+        </li>
+    `).join("");
 }
 
 function renderWeek() {
@@ -132,9 +176,9 @@ function createDayCard(date) {
             if (assignmentData.done) assignment.classList.add("done");
             assignment.innerHTML = `
                 <div class="assignment-content">
-                    <span class="assignment-title">${assignmentData.title}</span>
-                    <span class="assignment-course">${assignmentData.courseName}</span>
-                    <span class="assignment-weight">${assignmentData.weightLabel}</span>
+                    <span class="assignment-title">${escapeHtml(assignmentData.title)}</span>
+                    <span class="assignment-course">${escapeHtml(assignmentData.courseName)}</span>
+                    <span class="assignment-weight">${escapeHtml(assignmentData.weightLabel)}</span>
                 </div>
                 <button class="done-btn" type="button">Done</button>
             `;
@@ -195,11 +239,10 @@ yearSelect.addEventListener("change", () => {
 
 async function initializeCalendar() {
     await loadAssignments();
+    renderUpcomingDeadlines();
     renderWeek();
     monthControls.style.display = "none";
     weekBtn.classList.add("active");
 }
 
 initializeCalendar();
-
-

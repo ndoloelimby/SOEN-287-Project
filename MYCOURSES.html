@@ -67,13 +67,28 @@
             <div id="archivedContainer" class="hidden cards"></div> 
         </div>
 
-       <div class="calendar-controls">
+<div class="calendar-controls">
     <div class="today-label">
       <h3 id = "todayTitle"></h3>  
     </div>
 </div>
 
 <div id="calendarContainer"></div>
+
+        <section class="enrollment-panel">
+            <div class="enrollment-card">
+                <h3>Enrollment</h3>
+                <p>Enter a course code to add it to your course list.</p>
+                <div class="enrollment-fields">
+                    <div class="enrollment-field">
+                        <label for="enrollCourseCode">Course Code</label>
+                        <input type="text" id="enrollCourseCode" placeholder="e.g. SOEN 287">
+                    </div>
+                    <button id="enrollButton" type="button">Enroll</button>
+                </div>
+                <p id="enrollmentMessage" class="enrollment-message" aria-live="polite"></p>
+            </div>
+        </section>
 
     </main>
     </div>
