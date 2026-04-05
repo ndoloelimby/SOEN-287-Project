@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const PDFDocument = require('pdfkit');
+const { Parser } = require('json2csv');
 
 // GET all grades for a course
 router.get('/:courseId', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1; // temporary until auth is ready
+    const studentId = 1;
 
     db.query(
         'SELECT * FROM student_grades WHERE course_id = ? AND student_id = ?',
@@ -19,7 +21,7 @@ router.get('/:courseId', (req, res) => {
 
 // ADD a new grade
 router.post('/', (req, res) => {
-    const studentId = 1; // temporary until auth is ready
+    const studentId = 1;
     const { course_id, assessment_name, category, 
             due_date, earned_marks, total_marks, status } = req.body;
 
@@ -71,10 +73,10 @@ router.delete('/:id', (req, res) => {
     );
 });
 
-// GET average for a course (server-side calculation)
+// GET average for a course
 router.get('/:courseId/average', (req, res) => {
     const { courseId } = req.params;
-    const studentId = 1; // temporary until auth is ready
+    const studentId = 1;
 
     db.query(
         `SELECT 
@@ -95,7 +97,7 @@ router.get('/:courseId/average', (req, res) => {
 
 // GET GPA across all courses
 router.get('/gpa/all', (req, res) => {
-    const studentId = 1; // temporary until auth is ready
+    const studentId = 1;
 
     db.query(
         `SELECT 
@@ -110,7 +112,6 @@ router.get('/gpa/all', (req, res) => {
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
 
-            // Convert average to GPA
             const gpaScale = (avg) => {
                 if (avg >= 90) return 4.3;
                 if (avg >= 85) return 4.0;
@@ -140,8 +141,7 @@ router.get('/gpa/all', (req, res) => {
     );
 });
 
-<<<<<<< HEAD
-// GET all grades for a course (admin view — all students)
+// GET all grades for a course (admin view)
 router.get('/:courseId/all', (req, res) => {
     const { courseId } = req.params;
     db.query(
@@ -155,7 +155,10 @@ router.get('/:courseId/all', (req, res) => {
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);
-=======
+        }
+    );
+});
+
 // GET analytics data for a course
 router.get('/:courseId/analytics', (req, res) => {
     const { courseId } = req.params;
@@ -189,9 +192,6 @@ router.get('/:courseId/analytics', (req, res) => {
         }
     );
 });
-
-const PDFDocument = require('pdfkit');
-const { Parser } = require('json2csv');
 
 // EXPORT to CSV
 router.get('/:courseId/export/csv', (req, res) => {
@@ -258,7 +258,6 @@ router.get('/:courseId/export/pdf', (req, res) => {
             res.attachment(`course_${courseId}_grades.pdf`);
             doc.pipe(res);
 
-            // Title
             doc.fontSize(20)
                .fillColor('#2d1b6e')
                .text('Smart Course Companion', 
@@ -269,7 +268,6 @@ router.get('/:courseId/export/pdf', (req, res) => {
                     { align: 'center' });
             doc.moveDown();
 
-            // Overall average
             if (results.length > 0) {
                 doc.fontSize(12)
                    .fillColor('#000')
@@ -277,7 +275,6 @@ router.get('/:courseId/export/pdf', (req, res) => {
                 doc.moveDown();
             }
 
-            // Table header
             doc.fontSize(10)
                .fillColor('#ffffff')
                .rect(40, doc.y, 520, 20)
@@ -293,7 +290,6 @@ router.get('/:courseId/export/pdf', (req, res) => {
 
             doc.moveDown();
 
-            // Table rows
             results.forEach((g, i) => {
                 const y = doc.y;
                 if (i % 2 === 0) {
@@ -312,7 +308,6 @@ router.get('/:courseId/export/pdf', (req, res) => {
             });
 
             doc.end();
->>>>>>> fbb3d68442f8b5c7c2fa6625c74ea7c3085dd4bd
         }
     );
 });
