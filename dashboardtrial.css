@@ -404,3 +404,26 @@ body {
     text-decoration: line-through;
 }
 
+
+
+.week-view {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    align-items: stretch;
+}
+
+.day-card {
+    min-height: 180px;
+}
+
+.week-view .day-card {
+    min-height: 220px;
+    padding-top: 34px;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.calendar.month .day-card {
+    padding-top: 26px;
+}

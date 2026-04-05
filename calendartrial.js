@@ -130,8 +130,6 @@ function createDayCard(date) {
             const assignment = document.createElement("div");
             assignment.className = "assignment";
             if (assignmentData.done) assignment.classList.add("done");
-
-            assignment.style.marginTop = "18px";
             assignment.innerHTML = `
                 <div class="assignment-content">
                     <span class="assignment-title">${assignmentData.title}</span>
@@ -203,3 +201,5 @@ async function initializeCalendar() {
 }
 
 initializeCalendar();
+
+
