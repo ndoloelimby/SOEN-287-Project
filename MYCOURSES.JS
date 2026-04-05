@@ -237,7 +237,12 @@ function renderCalendar(view) {
   const today = new Date();
 
   if (view === 'today') {
-    const div = createDay(today);
+    const todayTitle = document.getElementById('todayTitle');
+    if (todayTitle) {
+      todayTitle.textContent = today.toDateString();
+    }
+
+    const div = createDay(today, { showHeader: false, emptyMessage: 'nothing due today' });
     calendarContainer.appendChild(div);
   }
 
@@ -269,21 +274,27 @@ function renderCalendar(view) {
   }
 }
 
-function createDay(date) {
+function createDay(date, options = {}) {
   const day = document.createElement('div');
   day.className = 'day';
+  const { showHeader = true, emptyMessage = '' } = options;
 
   if (date.toDateString() === new Date().toDateString()) {
     day.classList.add('today');
   }
 
-  day.innerHTML = `<h4>${date.toDateString()}</h4>`;
+  if (showHeader) {
+    day.innerHTML = `<h4>${date.toDateString()}</h4>`;
+  }
+
+  let hasAssignments = false;
 
   assignmentsData.forEach((assignmentItem) => {
     const assignmentDate = new Date();
     assignmentDate.setDate(assignmentDate.getDate() - assignmentDate.getDay() + assignmentItem.dayOffset);
 
     if (date.toDateString() === assignmentDate.toDateString()) {
+      hasAssignments = true;
       const assignment = document.createElement('div');
       assignment.className = 'assignment';
       assignment.textContent = assignmentItem.title;
@@ -291,10 +302,16 @@ function createDay(date) {
     }
   });
 
+  if (!hasAssignments && emptyMessage) {
+    const message = document.createElement('p');
+    message.className = 'day-empty';
+    message.textContent = emptyMessage;
+    day.appendChild(message);
+  }
+
   return day;
 }
 
-document.getElementById('todayTitle').textContent = 'Today';
 renderCalendar('today');
 loadEnrollments();
 

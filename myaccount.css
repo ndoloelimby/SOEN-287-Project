@@ -11,7 +11,6 @@ body {
     color: #1a1a2e;
 }
 
-/* ── NAVBAR ── */
 .navbar {
     display: flex;
     align-items: center;
@@ -25,7 +24,6 @@ body {
     top: 0;
     z-index: 100;
     box-shadow: 0 2px 20px rgba(106, 79, 207, 0.15);
-    box-sizing: border-box;
 }
 
 .navbar h2 {
@@ -70,10 +68,6 @@ body {
     color: inherit;
 }
 
-.navbar ul li.active {
-    background: rgba(106, 79, 207, 0.2);
-}
-
 .nav-icons {
     margin-left: auto;
     display: flex;
@@ -98,45 +92,9 @@ body {
 .nav-icons .logout img:hover {
     background: rgba(106, 79, 207, 0.25);
 }
-.logo {
-    color: #2d1b6e;
-    font-weight: 700;
-    font-size: 17px;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-    flex: 0 0 auto;
-    margin-right: auto;
-}
 
-.navlinks {
-    flex: 0 0 auto;
-    margin-left: 24px;
-}
-
-.navlinks a {
-    display: inline-block;
-    text-decoration: none;
-    white-space: nowrap;
-    color: #2d1b6e;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 8px 18px;
-    border-radius: 8px;
-    border: 1.5px solid rgba(100, 80, 200, 0.25);
-    background: rgba(255, 255, 255, 0.45);
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
-    letter-spacing: 0.2px;
-}
-
-.navlinks a:hover {
-    background: rgba(106, 79, 207, 0.15);
-    border-color: rgba(106, 79, 207, 0.5);
-    color: #4a2db8;
-}
-
-/* ===== MAIN CONTENT ===== */
 .content {
-    padding: 90px 40px 40px 40px;
+    padding: 90px 40px 40px;
     max-width: 1000px;
     margin: 0 auto;
 }
@@ -145,18 +103,34 @@ h1 {
     font-size: 26px;
     font-weight: 700;
     color: #1a1040;
-    margin-bottom: 28px;
+    margin-bottom: 12px;
     letter-spacing: -0.3px;
 }
 
-/* ===== ACCOUNT CONTAINER ===== */
+.account-intro {
+    margin-bottom: 20px;
+    color: rgba(42, 26, 94, 0.85);
+}
+
+.account-status {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.account-status.error {
+    background: rgba(173, 34, 34, 0.12);
+    color: #8f1f1f;
+    border: 1px solid rgba(173, 34, 34, 0.2);
+}
+
 .account-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* ===== ACCOUNT CARD ===== */
 .account-card {
     background: rgba(255, 255, 255, 0.22);
     backdrop-filter: blur(14px);
@@ -213,7 +187,6 @@ h1 {
     flex-shrink: 0;
 }
 
-/* ===== COURSE LIST ===== */
 .course-list {
     list-style: none;
     padding-left: 0;
@@ -243,4 +216,60 @@ h1 {
     border-radius: 50%;
     background: linear-gradient(135deg, #7b5cf0, #60c0e0);
     flex-shrink: 0;
+}
+
+.course-main {
+    font-weight: 600;
+}
+
+.course-meta {
+    font-size: 13px;
+    color: rgba(42, 26, 94, 0.72);
+}
+
+.account-empty {
+    color: rgba(42, 26, 94, 0.7);
+    font-style: italic;
+}
+
+body.light-mode {
+    background: linear-gradient(135deg, #f6f3ff 0%, #e8eefc 50%, #f8fbff 100%);
+}
+
+body.light-mode .account-card {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 700px) {
+    .content {
+        padding: 78px 18px 24px;
+    }
+
+    .navbar {
+        padding: 0 14px;
+        gap: 10px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 52px;
+    }
+
+    .navbar ul {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+
+    .account-card {
+        padding: 22px 18px;
+    }
+
+    .account-card p {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .account-card p strong {
+        min-width: 0;
+    }
 }
