@@ -42,11 +42,22 @@
     <div class="middle">
 
         <aside class="sidebar">
-        <ul>
-            
-            <li><a class = "active-course" href="Login_s.html">log out</a></li>
-            <li> <a class = "active-course"href="myaccount.html"> My Account </a></li>
-        </ul>
+            <section class="agenda-panel">
+                <div class="agenda-header">
+                    <h3>Agenda</h3>
+                   
+                </div>
+
+                <div class="agenda-controls">
+                    <input type="text" id="agendaTaskInput" placeholder="Type a task..." aria-label="Task">
+                    <input type="color" id="agendaColorInput" value="#9a89d6" aria-label="Task color">
+                    <button id="agendaAddButton" type="button" aria-label="Add agenda task">+</button>
+                </div>
+
+                <p id="agendaMessage" class="agenda-message" aria-live="polite"></p>
+                <div class="agenda-divider" aria-hidden="true"></div>
+                <ul id="agendaList" class="agenda-list"></ul>
+            </section>
         </aside>
 
     <main class="main">
@@ -73,12 +84,12 @@
     </div>
 </div>
 
+ 
 <div id="calendarContainer"></div>
 
         <section class="enrollment-panel">
             <div class="enrollment-card">
-                <h3>Enrollment</h3>
-                <p>Enter a course code to add it to your course list.</p>
+                <h3 class="enrollment-title">Enroll in a Course</h3>
                 <div class="enrollment-fields">
                     <div class="enrollment-field">
                         <label for="enrollCourseCode">Course Code</label>
@@ -108,3 +119,14 @@
 <script src="MYCOURSES.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+

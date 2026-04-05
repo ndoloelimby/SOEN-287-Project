@@ -1,4 +1,5 @@
 const API_BASE = 'http://localhost:3000/api/student';
+const GRADES_API = 'http://localhost:3000/api/grades';
 
 const detailPageByCourseCode = {
   ENGR233: 'detailsENGR233.html',
@@ -10,13 +11,113 @@ const detailPageByCourseCode = {
 let courses = [];
 let archivedIds = new Set();
 let selectedAssignment = null;
+let assignmentsData = [];
 
 const container = document.getElementById('courseContainer');
 const archivedContainer = document.getElementById('archivedContainer');
 const enrollInput = document.getElementById('enrollCourseCode');
 const enrollButton = document.getElementById('enrollButton');
 const enrollmentMessage = document.getElementById('enrollmentMessage');
+const calendarContainer = document.getElementById('calendarContainer');
+const agendaTaskInput = document.getElementById('agendaTaskInput');
+const agendaColorInput = document.getElementById('agendaColorInput');
+const agendaAddButton = document.getElementById('agendaAddButton');
+const agendaMessage = document.getElementById('agendaMessage');
+const agendaList = document.getElementById('agendaList');
+const AGENDA_STORAGE_KEY = 'mycourses.agendaTasks';
 
+function loadAgendaTasks() {
+  try {
+    const storedValue = localStorage.getItem(AGENDA_STORAGE_KEY);
+    const parsed = storedValue ? JSON.parse(storedValue) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveAgendaTasks(tasks) {
+  localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function showAgendaMessage(message = '', type = '') {
+  if (!agendaMessage) return;
+  agendaMessage.textContent = message;
+  agendaMessage.className = `agenda-message${type ? ` ${type}` : ''}`;
+}
+
+function removeAgendaTask(taskId) {
+  const remainingTasks = loadAgendaTasks().filter((task) => task.id !== taskId);
+  saveAgendaTasks(remainingTasks);
+  renderAgenda();
+}
+
+function renderAgenda() {
+  if (!agendaList) return;
+  const tasks = loadAgendaTasks();
+  agendaList.innerHTML = '';
+
+  if (tasks.length === 0) {
+    const emptyState = document.createElement('li');
+    emptyState.className = 'agenda-empty';
+    emptyState.textContent = 'No agenda items yet.';
+    agendaList.appendChild(emptyState);
+    return;
+  }
+
+  tasks.forEach((task) => {
+    const item = document.createElement('li');
+    item.className = 'agenda-item';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'agenda-item-checkbox';
+    checkbox.setAttribute('aria-label', `Complete ${task.text}`);
+    checkbox.addEventListener('change', () => {
+      checkbox.disabled = true;
+      item.classList.add('agenda-item-completing');
+      setTimeout(() => {
+        removeAgendaTask(task.id);
+      }, 220);
+    });
+
+    const swatch = document.createElement('span');
+    swatch.className = 'agenda-item-swatch';
+    swatch.style.backgroundColor = task.color;
+
+    const text = document.createElement('span');
+    text.className = 'agenda-item-text';
+    text.textContent = task.text;
+
+    item.appendChild(swatch);
+    item.appendChild(text);
+    item.appendChild(checkbox);
+    agendaList.appendChild(item);
+  });
+}
+
+function addAgendaTask() {
+  if (!agendaTaskInput || !agendaColorInput) return;
+
+  const text = agendaTaskInput.value.trim();
+  if (!text) {
+    showAgendaMessage('Please enter a task first.', 'error');
+    return;
+  }
+
+  const tasks = loadAgendaTasks();
+  tasks.push({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    text,
+    color: agendaColorInput.value || '#9a89d6'
+  });
+
+  saveAgendaTasks(tasks);
+  agendaTaskInput.value = '';
+  showAgendaMessage('Task added.');
+  renderAgenda();
+  agendaTaskInput.focus();
+}
 function normalizeCourseCode(value) {
   return String(value || '').replace(/\s+/g, '').toUpperCase();
 }
@@ -49,6 +150,54 @@ function getVisibleCourses() {
 
 function getArchivedCourses() {
   return courses.filter((course) => archivedIds.has(course.enrollment_id));
+}
+
+function parseDueDate(value) {
+  if (!value) return null;
+  const normalized = typeof value === 'string' ? value.replace(' ', 'T') : value;
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function sameCalendarDay(left, right) {
+  return left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate();
+}
+
+function formatAssignmentLabel(item) {
+  const courseCode = item.courseCode ? `${item.courseCode}: ` : '';
+  return `${courseCode}${item.title}`;
+}
+
+async function loadCalendarAssignments() {
+  const detailResponses = await Promise.all(
+    courses.map(async (course) => {
+      try {
+        const response = await fetch(`${GRADES_API}/${course.course_id}/details`);
+        const payload = await response.json().catch(() => ([]));
+        if (!response.ok) {
+          throw new Error(payload.error || 'Could not load assessments');
+        }
+
+        return payload.map((assessment) => ({
+          id: assessment.grade_id ?? assessment.id,
+          title: assessment.assessment_name || 'Untitled assessment',
+          dueDate: parseDueDate(assessment.due_date),
+          courseCode: course.course_code || '',
+          courseName: course.course_name || '',
+          status: assessment.status || 'pending'
+        }));
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  assignmentsData = detailResponses
+    .flat()
+    .filter((assessment) => assessment.dueDate)
+    .sort((a, b) => a.dueDate - b.dueDate);
 }
 
 function createCard(course, isArchived = false) {
@@ -181,9 +330,13 @@ async function loadEnrollments() {
 
     courses = payload;
     renderAll();
+    await loadCalendarAssignments();
+    renderCalendar('today');
   } catch (error) {
     courses = [];
+    assignmentsData = [];
     renderAll();
+    renderCalendar('today');
     showEnrollmentMessage(error.message, 'error');
   }
 }
@@ -225,24 +378,40 @@ enrollInput.addEventListener('keydown', (event) => {
   }
 });
 
-const calendarContainer = document.getElementById('calendarContainer');
+function formatLongDate(date) {
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthName = date.toLocaleDateString('en-US', { month: 'long' });
+  const dayNumber = date.getDate();
+  const year = date.getFullYear();
 
-const assignmentsData = [
-  { title: 'Assignment 1 - COMP249', dayOffset: 2 },
-  { title: 'Design Diagram', dayOffset: 4 }
-];
+  const suffix = (value) => {
+    if (value >= 11 && value <= 13) return 'th';
+    const lastDigit = value % 10;
+    if (lastDigit === 1) return 'st';
+    if (lastDigit === 2) return 'nd';
+    if (lastDigit === 3) return 'rd';
+    return 'th';
+  };
+
+  return `${dayName}, ${monthName} ${dayNumber}${suffix(dayNumber)}, ${year}`;
+}
 
 function renderCalendar(view) {
   calendarContainer.innerHTML = '';
-  const today = new Date();
+  const now = new Date();
 
   if (view === 'today') {
     const todayTitle = document.getElementById('todayTitle');
     if (todayTitle) {
-      todayTitle.textContent = today.toDateString();
+      todayTitle.textContent = '';
     }
 
-    const div = createDay(today, { showHeader: false, emptyMessage: 'nothing due today' });
+    const div = createDay(now, {
+      showHeader: true,
+      headerText: formatLongDate(now),
+      emptyMessage: 'nothing due today',
+      variant: 'today-card'
+    });
     calendarContainer.appendChild(div);
   }
 
@@ -251,8 +420,8 @@ function renderCalendar(view) {
     week.className = 'calendar week';
 
     for (let i = 0; i < 7; i += 1) {
-      const date = new Date();
-      date.setDate(today.getDate() - today.getDay() + i);
+      const date = new Date(now);
+      date.setDate(now.getDate() - now.getDay() + i);
       week.appendChild(createDay(date));
     }
 
@@ -263,10 +432,10 @@ function renderCalendar(view) {
     const month = document.createElement('div');
     month.className = 'calendar month';
 
-    const days = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
     for (let i = 1; i <= days; i += 1) {
-      const date = new Date(today.getFullYear(), today.getMonth(), i);
+      const date = new Date(now.getFullYear(), now.getMonth(), i);
       month.appendChild(createDay(date));
     }
 
@@ -277,32 +446,44 @@ function renderCalendar(view) {
 function createDay(date, options = {}) {
   const day = document.createElement('div');
   day.className = 'day';
-  const { showHeader = true, emptyMessage = '' } = options;
+  const {
+    showHeader = true,
+    emptyMessage = '',
+    headerText = date.toDateString(),
+    variant = ''
+  } = options;
 
-  if (date.toDateString() === new Date().toDateString()) {
+  if (variant) {
+    day.classList.add(variant);
+  }
+
+  if (sameCalendarDay(date, new Date())) {
     day.classList.add('today');
   }
 
   if (showHeader) {
-    day.innerHTML = `<h4>${date.toDateString()}</h4>`;
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    const title = document.createElement('h4');
+    title.textContent = headerText;
+    header.appendChild(title);
+    day.appendChild(header);
   }
 
-  let hasAssignments = false;
+  const dayAssignments = assignmentsData.filter((assignmentItem) =>
+    sameCalendarDay(date, assignmentItem.dueDate)
+  );
 
-  assignmentsData.forEach((assignmentItem) => {
-    const assignmentDate = new Date();
-    assignmentDate.setDate(assignmentDate.getDate() - assignmentDate.getDay() + assignmentItem.dayOffset);
-
-    if (date.toDateString() === assignmentDate.toDateString()) {
-      hasAssignments = true;
+  if (dayAssignments.length > 0) {
+    dayAssignments.forEach((assignmentItem) => {
       const assignment = document.createElement('div');
       assignment.className = 'assignment';
-      assignment.textContent = assignmentItem.title;
+      assignment.textContent = formatAssignmentLabel(assignmentItem);
+      assignment.dataset.assignmentId = assignmentItem.id;
+      assignment.dataset.courseCode = assignmentItem.courseCode;
       day.appendChild(assignment);
-    }
-  });
-
-  if (!hasAssignments && emptyMessage) {
+    });
+  } else if (emptyMessage) {
     const message = document.createElement('p');
     message.className = 'day-empty';
     message.textContent = emptyMessage;
@@ -313,6 +494,21 @@ function createDay(date, options = {}) {
 }
 
 renderCalendar('today');
+renderAgenda();
+
+if (agendaAddButton) {
+  agendaAddButton.addEventListener('click', addAgendaTask);
+}
+
+if (agendaTaskInput) {
+  agendaTaskInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addAgendaTask();
+    }
+  });
+}
+
 loadEnrollments();
 
 const calendarView = document.getElementById('calendarView');
@@ -346,3 +542,11 @@ function markDone() {
 
 window.closeModal = closeModal;
 window.markDone = markDone;
+
+
+
+
+
+
+
+

@@ -116,22 +116,29 @@ body {
 }
 
 .nav-box {
-    display:block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 18px;
     text-decoration: none;
-    color: white;
-     background: linear-gradient(200deg, #6a4fcf 0%, #60c0e0 100%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 10px;
-    block-size: 45px;
-    padding: 10px 16px;
-    transition: 0.3s;
-    font-size: 20px;
+    color: #5b3cc4;
+    background: rgba(255, 255, 255, 0.32);
+    border: 1.5px solid rgba(106, 79, 207, 0.38);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     text-align: center;
-    transition: 0.25s;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .nav-box:hover {
-    background: #7f6bd8;
+    background: rgba(255, 255, 255, 0.56);
+    border-color: rgba(106, 79, 207, 0.6);
+    color: #43219d;
+    box-shadow: 0 8px 18px -14px rgba(45, 27, 110, 0.55);
 }
 
 
@@ -262,7 +269,10 @@ body {
 
 
 .nav-box.active {
-    background: #48a2f0;
+    background: rgba(106, 79, 207, 0.14);
+    border-color: rgba(106, 79, 207, 0.7);
+    color: #2d1b6e;
+    box-shadow: 0 10px 20px -16px rgba(45, 27, 110, 0.6);
 } 
 /*---------------------------------------------------------------------------------------------------------------
 /* ── DROPDOWNS ── */
