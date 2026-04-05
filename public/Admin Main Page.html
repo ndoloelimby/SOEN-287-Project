@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Admin's Main Page</title>
+        <link rel="stylesheet" href="Design AdminPage.css" />
+    </head>
+    <body>
+
+    <!-- Top Navigation Bar -->
+    <div class="TopNav">
+        <h2>Smart Course Companion</h2>
+        <ul>
+            <a href="Admin Main Page.html">
+            <li id="dashboard" style="background-color: rgb(130, 100, 136); border-radius: 15px;"> DashBoard </li>
+            </a>
+            <a href="Courses Page.html">
+            <li id="courses"> Courses</li>
+            </a>
+             <a href="Analyticss.html">
+            <li id="grades&charts"> Analytics </li>
+            </a>
+             <a href="Courses Template.html">
+            <li id="Courses Template"> Courses Template </li>
+            </a>
+            <a href="Settings.html">
+            <li id="Settings"> Settings </li>
+            </a>
+        </ul>
+
+        <!--  Icons for the lightmode and the logout Button -->
+        <div class="TopNavIcons">
+            <div class="lightmode">
+                <a href="">
+                    <img src="https://static.thenounproject.com/png/4808961-200.png"
+                         alt="light mode icon" />
+                </a>
+            </div>
+            <div class="Logout">
+                <a href="LOGIN_AD.html">
+                    <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png"
+                         alt="Logout icon" />
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Container -->
+    <div class="MainContainer">
+        <div class="PageCenter">
+
+            <div class="NavBar">
+                <div class="Welcome">
+                    <h4>Hey "Admin's Name" <img src="https://cdn-icons-png.flaticon.com/512/7218/7218647.png" /></h4>
+                    <p>Welcome to Smart Course Companion, we're happy to see you again!</p>
+                    <div class="QuickStats">
+                        <div class="StatCard">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3429/3429149.png" alt="books icon" />
+                            <strong>4</strong> Active Courses
+                        </div>
+                        <div class="StatCard">
+                            <img src="https://png.pngtree.com/png-clipart/20190614/original/pngtree-vector-male-student-icon-png-image_3785524.jpg" alt="students icon" />
+                            <strong>373</strong> Students
+                        </div>
+                        <div class="StatCard">
+                            <img src="https://cdn-icons-png.flaticon.com/512/9166/9166986.png" alt="assessment icon" />
+                            <strong>0</strong> Courses Disabled
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="Overview">
+                <h3>Recent Visited Pages</h3>
+                <div class="RecentGrid">
+                    <div class="PageCard">
+                        <a href="Courses Page.html">
+                            <img src="CoursesThumbnail.png" alt="Dashboard thumbnail" />
+                        </a>
+                        <p>Courses</p>
+                    </div>
+                    <div class="PageCard">
+                        <a href="Analyticss.html">
+                            <img src="AnalyticsThumbnail.png" alt="Grades thumbnail" />
+                        </a>
+                        <p>Grades & Charts</p>
+                    </div>
+                    <div class="PageCard">
+                        <a href="Courses Template.html">
+                            <img src="CourseTemplateThumbnail.png" alt="Mailbox thumbnail" />
+                        </a>
+                        <p>Schedule</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="Preview">
+                <h3>Upcoming Assignments Completion</h3>
+
+                <div class="StatsAssessment">
+                    <h4>COMP 249</h4>
+                    <p>ASSIGNMENT 1</p>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="rectangleBase">
+                            <div class="rectangleASS1">
+                                <span class="barLabel">39.74%</span>
+                            </div>
+                        </div>
+                        <span>62/156 Students</span>
+                    </div>
+                </div>
+
+                <div class="StatsAssessment">
+                    <h4>SOEN 228</h4>
+                    <p>LAB REPORT 1</p>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="rectangleBase">
+                            <div class="rectangleASS2">
+                                <span class="barLabel">30.49%</span>
+                            </div>
+                        </div>
+                        <span>25/82 Students</span>
+                    </div>
+                </div>
+
+                <div class="StatsAssessment">
+                    <h4>SOEN 287</h4>
+                    <p>PROJECT DELIVERY 1</p>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="rectangleBase">
+                            <div class="rectangleASS3">
+                                <span class="barLabel">89.62%</span>
+                            </div>
+                        </div>
+                        <span>121/135 Students</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="ActivityFeed">
+                <h3>Recent Activity</h3>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon enroll"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg-XjQo9QmpsWL3g-IapyIfUhm5dy33s3NaA&s" alt="Student Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Student enrolled in <strong>SOEN 287</strong></p>
+                        <span>2 hours ago</span>
+                    </div>
+                </div>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon assessment"><img src="https://static.vecteezy.com/system/resources/thumbnails/056/780/675/small/checklist-with-magnifying-glass-inspection-and-evaluation-icon-vector.jpg" alt="Assessment Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Assessment added to <strong>COMP 249</strong></p>
+                        <span>5 hours ago</span>
+                    </div>
+                </div>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon submit"><img src="https://t4.ftcdn.net/jpg/16/64/33/61/360_F_1664336169_Clg0XmCVy3O2CmzGPYBo9kusDyWPPfQV.jpg" alt="Check Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Project Delivery 1 submitted in <strong>SOEN 287</strong></p>
+                        <span>Yesterday</span>
+                    </div>
+                </div>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon enroll"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg-XjQo9QmpsWL3g-IapyIfUhm5dy33s3NaA&s" alt="Student Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Student enrolled in <strong>SOEN 228</strong></p>
+                        <span>Yesterday</span>
+                    </div>
+                </div>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon disabled"><img src="https://cdn-icons-png.flaticon.com/512/4610/4610214.png" alt="Disable Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Course <strong>ENGR 233</strong> was disabled</p>
+                        <span>2 days ago</span>
+                    </div>
+                </div>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon assessment"><img src="https://static.vecteezy.com/system/resources/thumbnails/056/780/675/small/checklist-with-magnifying-glass-inspection-and-evaluation-icon-vector.jpg" alt="Assessment Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Lab Report 1 deadline updated in <strong>SOEN 228</strong></p>
+                        <span>2 days ago</span>
+                    </div>
+                </div>
+
+                <div class="ActivityItem">
+                    <div class="ActivityIcon submit"><img src="https://t4.ftcdn.net/jpg/16/64/33/61/360_F_1664336169_Clg0XmCVy3O2CmzGPYBo9kusDyWPPfQV.jpg" alt="Check Icon" /></div>
+                    <div class="ActivityText">
+                        <p>Assignment 1 submitted in <strong>COMP 249</strong></p>
+                        <span>3 days ago</span>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+    </body>
+</html>
