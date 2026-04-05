@@ -16,16 +16,19 @@
         <li><a href="analytics.html">Analytics</a></li>
     </ul>
     <div class="nav-icons">
-        
+        <div class="lightmode" onclick="toggleTheme()">
+            <img src="https://static.thenounproject.com/png/4808961-200.png"
+                alt="light mode icon"/>
+        </div>
         <div class="myaccount">
             <a href="myaccount.html">
-                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" 
+                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png"
                     alt="My Account"/>
             </a>
         </div>
         <div class="logout">
             <a href="Login_s.html">
-                <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" 
+                <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png"
                     alt="Logout"/>
             </a>
         </div>
@@ -34,18 +37,24 @@
 
 
 <div class="page">
-
     <div class="middle">
-
         <aside class="sidebar">
         <ul>
-            
-            <li><a class = "active-course" href="Login_s.html">log out</a></li>
-            <li> <a class = "active-course"href="myaccount.html"> My Account </a></li>
+            <li><a class="active-course" href="Login_s.html">log out</a></li>
+            <li><a class="active-course" href="myaccount.html">My Account</a></li>
         </ul>
         </aside>
 
     <main class="main">
+        <section class="page-hero">
+            <div>
+                <p class="eyebrow">Student Tracker</p>
+                <h1>My Courses</h1>
+                <p class="hero-copy">
+                    Keep your active courses handy and use the day planner below to catch anything due today from the assessments you entered yourself.
+                </p>
+            </div>
+        </section>
 
         <div class="topbar">
             <input type="text" id="search" placeholder="Search courses...">
@@ -60,29 +69,21 @@
 
         <div class="archived-panel">
             <button id="toggleArchived">Hidden Courses ▼</button>
-            <div id="archivedContainer" class="hidden cards"></div> 
+            <div id="archivedContainer" class="hidden cards"></div>
         </div>
 
-       <div class="calendar-controls">
-    <div class="today-label">
-      <h3 id = "todayTitle"></h3>  
-    </div>
-</div>
+        <section class="today-planner">
+            <div class="today-planner-head">
+                <div class="today-label">
+                    <p class="eyebrow">Due Today</p>
+                    <h3 id="todayTitle"></h3>
+                </div>
+                <p id="todaySummary" class="today-summary"></p>
+            </div>
 
-<div id="calendarContainer"></div>
-
+            <div id="todayAssessments" class="today-assessments"></div>
+        </section>
     </main>
-    </div>
-
-
-</div>
-
-
-<div class="modal" id="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle"></h3>
-        <button onclick="markDone()">Mark as Done</button>
-        <button onclick="closeModal()">Close</button> 
     </div>
 </div>
 
