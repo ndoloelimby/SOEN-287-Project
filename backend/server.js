@@ -12,6 +12,9 @@ app.use(express.json());
 const gradesRouter = require('./routes/grades');
 app.use('/api/grades', gradesRouter);
 
+const studentRouter = require('./routes/student');
+app.use('/api/student', studentRouter);
+
 const adminCoursesRoutes = require('./routes/adminCourses');
 console.log('✅ registering adminCourses routes');
 app.use('/api', adminCoursesRoutes);
