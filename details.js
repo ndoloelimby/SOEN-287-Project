@@ -46,11 +46,12 @@ function calculatePercentage(earnedMarks, totalMarks) {
 }
 
 function createRow(grade) {
+    const gradeId = grade.grade_id ?? grade.id;
     const dueDate = grade.due_date ? String(grade.due_date).split('T')[0] : '';
     const percentage = calculatePercentage(grade.earned_marks, grade.total_marks);
 
     return `
-    <tr id="row-${grade.id}">
+    <tr id="row-${gradeId}">
         <td><input type="text" class="assessments-input js-name"
             value="${escapeHtml(grade.assessment_name)}" disabled></td>
         <td><input type="text" class="assessments-input js-category"
@@ -71,8 +72,8 @@ function createRow(grade) {
         </td>
         <td class="js-result">${percentage ? `${percentage}%` : '-'}</td>
         <td class="actions">
-            <button onclick="editRow(${grade.id})">Edit</button>
-            <button onclick="deleteRow(${grade.id})">Delete</button>
+            <button onclick="editRow(${gradeId})">Edit</button>
+            <button onclick="deleteRow(${gradeId})">Delete</button>
         </td>
     </tr>`;
 }
