@@ -60,11 +60,6 @@
             </a>
         </ul>
         <div class="TopNavIcons">
-            <div class="lightmode">
-                <a href="">
-                    <img src="https://static.thenounproject.com/png/4808961-200.png" alt="light mode icon" />
-                </a>
-            </div>
             <div class="Logout">
                 <a href="LOGIN_AD.html">
                     <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" alt="Logout icon" />
@@ -124,7 +119,7 @@
                     <p id="export-label">Export completion data</p>
                     <div class="ExportButtons">
                         <a href="#" class="BtnExport" id="btn-csv">⬇ Export CSV</a>
-                        <a href="#" class="BtnExport">⬇ Export PDF</a>
+                        <a href="#" class="BtnExport" id="btn-pdf">⬇ Export PDF</a>
                     </div>
                 </div>
             </div>
@@ -137,21 +132,41 @@
         // Badge colour per course code prefix
         function badgeClass(code) {
             const prefix = code.split(' ')[0].toLowerCase();
-            const map = { soen: 'badge-soen', comp: 'badge-comp', engr: 'badge-engr', math: 'badge-engr', elec: 'badge-comp' };
+            const map = {
+                soen: 'badge-soen',
+                comp: 'badge-comp',
+                engr: 'badge-engr',
+                math: 'badge-engr',
+                elec: 'badge-comp'
+            };
             return map[prefix] || 'badge-soen';
         }
 
         // Completion status thresholds
         function statusInfo(pct) {
-            if (pct >= 75) return { cls: 'status-high',   fillCls: 'fill-high',   label: 'On Track' };
+            if (pct >= 75) return { cls: 'status-high', fillCls: 'fill-high', label: 'On Track' };
             if (pct >= 40) return { cls: 'status-medium', fillCls: 'fill-medium', label: 'In Progress' };
-            return            { cls: 'status-low',    fillCls: 'fill-low',    label: 'Low Completion' };
+            return { cls: 'status-low', fillCls: 'fill-low', label: 'Low Completion' };
         }
 
         // Format a datetime string nicely
         function fmtDate(d) {
             if (!d) return null;
-            return new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+            return new Date(d).toLocaleDateString('en-CA', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // Escape HTML for safe PDF/print content
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         // Is this due within the next 48 hours?
@@ -164,33 +179,35 @@
         // ── Main load ────────────────────────────────────────
         async function loadAnalytics() {
             try {
-                const res     = await fetch(`${API}/courses`);
+                const res = await fetch(`${API}/courses`);
                 const courses = await res.json();
 
                 // Fetch all templates in parallel
                 const templateResults = await Promise.all(
-                    courses.map(c => fetch(`${API}/templates/${c.id}`).then(r => r.json()).then(tmpl => {
-                        tmpl.forEach(t => { t._course = c; });
-                        return tmpl;
-                    }))
+                    courses.map(c =>
+                        fetch(`${API}/templates/${c.id}`)
+                            .then(r => r.json())
+                            .then(tmpl => {
+                                tmpl.forEach(t => { t._course = c; });
+                                return tmpl;
+                            })
+                    )
                 );
 
                 const allTemplates = templateResults.flat();
                 const activeCourses = courses.filter(c => c.is_enabled);
 
                 // ── Summary pills ──
-                const totalStudents    = activeCourses.reduce((s, c) => s + (c.max_students || 0), 0);
+                const totalStudents = activeCourses.reduce((s, c) => s + (c.max_students || 0), 0);
                 const totalAssessments = allTemplates.length;
-                const totalWeight      = allTemplates.reduce((s, t) => s + (parseFloat(t.weight) || 0), 0);
-                const terms            = [...new Set(activeCourses.map(c => c.term).filter(Boolean))];
+                const terms = [...new Set(activeCourses.map(c => c.term).filter(Boolean))];
 
-                document.getElementById('pill-courses').textContent     = activeCourses.length;
-                document.getElementById('pill-students').textContent    = totalStudents;
+                document.getElementById('pill-courses').textContent = activeCourses.length;
+                document.getElementById('pill-students').textContent = totalStudents;
                 document.getElementById('pill-assessments').textContent = totalAssessments;
-                // avg completion set after grades load
-                document.getElementById('page-title').textContent       =
+                document.getElementById('page-title').textContent =
                     `Grades & Charts${terms.length ? ' — ' + terms[0] : ''}`;
-                document.getElementById('export-label').textContent     =
+                document.getElementById('export-label').textContent =
                     `Export completion data${terms.length ? ' for ' + terms[0] : ''}`;
 
                 // ── Deadline strip ──
@@ -207,8 +224,8 @@
                 const tabsEl = document.getElementById('course-tabs');
                 activeCourses.forEach(c => {
                     const a = document.createElement('a');
-                    a.href        = `#course-${c.id}`;
-                    a.className   = 'CourseTab';
+                    a.href = `#course-${c.id}`;
+                    a.className = 'CourseTab';
                     a.dataset.filter = String(c.id);
                     a.textContent = c.course_code;
                     tabsEl.appendChild(a);
@@ -219,13 +236,17 @@
                     const tab = e.target.closest('.CourseTab');
                     if (!tab) return;
                     e.preventDefault();
+
                     tabsEl.querySelectorAll('.CourseTab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
+
                     const filter = tab.dataset.filter;
                     document.querySelectorAll('.CourseSection').forEach(sec => {
                         sec.style.display = (filter === 'all' || sec.dataset.courseId === filter) ? '' : 'none';
                     });
-                    document.querySelectorAll('.SectionDivider').forEach(d => d.style.display = filter === 'all' ? '' : 'none');
+                    document.querySelectorAll('.SectionDivider').forEach(d => {
+                        d.style.display = filter === 'all' ? '' : 'none';
+                    });
                 });
 
                 // ── Course sections — fetch real grades ──
@@ -233,6 +254,7 @@
 
                 if (!activeCourses.length) {
                     container.innerHTML = `<p class="empty-state">No active courses found.</p>`;
+                    document.getElementById('pill-weight').textContent = '0%';
                     return;
                 }
 
@@ -254,7 +276,8 @@
                     });
                 });
 
-                let totalPct = 0, totalBars = 0;
+                let totalPct = 0;
+                let totalBars = 0;
 
                 container.innerHTML = activeCourses.map((c, idx) => {
                     const templates = allTemplates.filter(t => t._course.id === c.id);
@@ -263,11 +286,14 @@
                     const barsHTML = templates.length
                         ? templates.map(t => {
                             const gradeData = courseGrades[t.assessment_name.toLowerCase()];
-                            const pct  = gradeData ? Math.min(100, parseFloat(gradeData.avg_pct) || 0) : 0;
+                            const pct = gradeData ? Math.min(100, parseFloat(gradeData.avg_pct) || 0) : 0;
                             const submissions = gradeData ? gradeData.submissions : 0;
                             const info = statusInfo(pct);
-                            const due  = fmtDate(t.due_date);
-                            totalPct += pct; totalBars++;
+                            const due = fmtDate(t.due_date);
+
+                            totalPct += pct;
+                            totalBars++;
+
                             return `
                                 <div class="AssessmentBar">
                                     <div class="BarTopRow">
@@ -287,9 +313,8 @@
                                     </div>
                                 </div>
                             `;
-                          }).join('')
+                        }).join('')
                         : `<p class="empty-state">No assessments added yet for this course.</p>`;
-
 
                     const divider = idx < activeCourses.length - 1
                         ? `<hr class="SectionDivider" />`
@@ -317,7 +342,16 @@
                 // ── CSV Export ──
                 document.getElementById('btn-csv').addEventListener('click', e => {
                     e.preventDefault();
-                    const rows = [['Course Code', 'Course Name', 'Assessment', 'Category', 'Weight (%)', 'Due Date']];
+
+                    const rows = [[
+                        'Course Code',
+                        'Course Name',
+                        'Assessment',
+                        'Category',
+                        'Weight (%)',
+                        'Due Date'
+                    ]];
+
                     allTemplates.forEach(t => {
                         rows.push([
                             t._course.course_code,
@@ -328,14 +362,182 @@
                             fmtDate(t.due_date) || ''
                         ]);
                     });
-                    const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+
+                    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
                     const blob = new Blob([csv], { type: 'text/csv' });
-                    const url  = URL.createObjectURL(blob);
-                    const a    = document.createElement('a');
-                    a.href     = url;
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
                     a.download = 'analytics_export.csv';
                     a.click();
                     URL.revokeObjectURL(url);
+                });
+
+                // ── PDF Export ──
+                document.getElementById('btn-pdf').addEventListener('click', e => {
+                    e.preventDefault();
+
+                    const activeTab = document.querySelector('.CourseTab.active');
+                    const selectedFilter = activeTab ? activeTab.dataset.filter : 'all';
+
+                    let filteredCourses = activeCourses;
+                    if (selectedFilter !== 'all') {
+                        filteredCourses = activeCourses.filter(c => String(c.id) === selectedFilter);
+                    }
+
+                    const printWindow = window.open('', '_blank');
+
+                    if (!printWindow) {
+                        alert('Please allow pop-ups to export the PDF.');
+                        return;
+                    }
+
+                    let content = `
+                        <html>
+                        <head>
+                            <title>Analytics PDF Export</title>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    padding: 30px;
+                                    color: #222;
+                                }
+                                h1 {
+                                    text-align: center;
+                                    color: #2d1b6e;
+                                    margin-bottom: 8px;
+                                }
+                                h2 {
+                                    margin-top: 30px;
+                                    color: #6a4fcf;
+                                    border-bottom: 1px solid #ccc;
+                                    padding-bottom: 5px;
+                                }
+                                .subtitle {
+                                    text-align: center;
+                                    color: #666;
+                                    margin-bottom: 25px;
+                                    font-size: 14px;
+                                }
+                                .summary {
+                                    margin: 20px 0 30px 0;
+                                    font-size: 15px;
+                                    line-height: 1.8;
+                                }
+                                table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                    margin-top: 15px;
+                                    margin-bottom: 25px;
+                                }
+                                th, td {
+                                    border: 1px solid #ccc;
+                                    padding: 8px;
+                                    text-align: left;
+                                    font-size: 14px;
+                                }
+                                th {
+                                    background-color: #6a4fcf;
+                                    color: white;
+                                }
+                                tr:nth-child(even) td {
+                                    background: #f7f4ff;
+                                }
+                                .empty-note {
+                                    font-style: italic;
+                                    color: #666;
+                                    margin-top: 10px;
+                                }
+                                @media print {
+                                    body {
+                                        padding: 10px;
+                                    }
+                                    a {
+                                        text-decoration: none;
+                                        color: inherit;
+                                    }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Smart Course Companion</h1>
+                            <div class="subtitle">Admin Analytics Report</div>
+                            <div class="summary">
+                                <div><strong>Active Courses:</strong> ${escapeHtml(activeCourses.length)}</div>
+                                <div><strong>Total Students:</strong> ${escapeHtml(document.getElementById('pill-students').textContent)}</div>
+                                <div><strong>Assessments:</strong> ${escapeHtml(document.getElementById('pill-assessments').textContent)}</div>
+                                <div><strong>Average Completion:</strong> ${escapeHtml(document.getElementById('pill-weight').textContent)}</div>
+                            </div>
+                    `;
+
+                    filteredCourses.forEach(c => {
+                        const templates = allTemplates.filter(t => t._course.id === c.id);
+                        const courseGrades = gradesMap[c.id] || {};
+
+                        content += `
+                            <h2>${escapeHtml(c.course_code)} — ${escapeHtml(c.course_name)}</h2>
+                            <p><strong>Students enrolled:</strong> ${escapeHtml(c.max_students ?? 0)}</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Assessment</th>
+                                        <th>Category</th>
+                                        <th>Due Date</th>
+                                        <th>Average %</th>
+                                        <th>Submissions</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+
+                        if (templates.length) {
+                            templates.forEach(t => {
+                                const key = t.assessment_name.toLowerCase();
+                                const gradeData = courseGrades[key];
+                                const pct = gradeData ? Math.min(100, parseFloat(gradeData.avg_pct) || 0) : 0;
+                                const submissions = gradeData ? gradeData.submissions : 0;
+                                const due = fmtDate(t.due_date) || '-';
+                                const info = statusInfo(pct);
+
+                                content += `
+                                    <tr>
+                                        <td>${escapeHtml(t.assessment_name)}</td>
+                                        <td>${escapeHtml(t.category || '-')}</td>
+                                        <td>${escapeHtml(due)}</td>
+                                        <td>${escapeHtml(pct + '%')}</td>
+                                        <td>${escapeHtml(submissions)}</td>
+                                        <td>${escapeHtml(info.label)}</td>
+                                    </tr>
+                                `;
+                            });
+                        } else {
+                            content += `
+                                <tr>
+                                    <td colspan="6">No assessments added yet for this course.</td>
+                                </tr>
+                            `;
+                        }
+
+                        content += `
+                                </tbody>
+                            </table>
+                        `;
+                    });
+
+                    content += `
+                        </body>
+                        </html>
+                    `;
+
+                    printWindow.document.open();
+                    printWindow.document.write(content);
+                    printWindow.document.close();
+
+                    printWindow.onload = () => {
+                        printWindow.focus();
+                        printWindow.print();
+                    };
                 });
 
             } catch (err) {

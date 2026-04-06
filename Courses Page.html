@@ -59,7 +59,6 @@
     }
     .popup-inner input[type="text"],
     .popup-inner input[type="number"],
-    .popup-inner input[type="datetime-local"],
     .popup-inner select,
     .popup-inner textarea {
       width: 100%;
@@ -74,6 +73,20 @@
       box-sizing: border-box;
       transition: border-color 0.2s, background 0.2s;
       appearance: none;
+    }
+    .popup-inner input[type="datetime-local"] {
+      width: 100%;
+      padding: 10px 13px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s, background 0.2s;
+      color-scheme: dark;
     }
     .popup-inner input:focus,
     .popup-inner select:focus,
@@ -173,7 +186,7 @@
   </div>
 </div>
 
-<!-- EDIT COURSE (dynamic — filled by JS) -->
+<!-- EDIT COURSE -->
 <div class="popup" id="editCourse">
   <div class="popup-inner">
     <h3>✏️ Edit Course</h3>
@@ -295,9 +308,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     TOP NAV
-══════════════════════════════════════ -->
+<!-- TOP NAV -->
 <div class="TopNav">
   <h2>Smart Course Companion</h2>
   <ul>
@@ -308,14 +319,11 @@
     <a href="Settings.html"><li id="Settings">Settings</li></a>
   </ul>
   <div class="TopNavIcons">
-    <div class="lightmode"><a href=""><img src="https://static.thenounproject.com/png/4808961-200.png" alt="light mode icon"/></a></div>
     <div class="Logout"><a href="LOGIN_AD.html"><img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" alt="Logout icon"/></a></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     MAIN CONTENT
-══════════════════════════════════════ -->
+<!-- MAIN CONTENT -->
 <div class="MainContainer">
   <div class="CoursesDisplay">
 
@@ -394,13 +402,9 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════ -->
 <script>
   const API = 'http://localhost:3000/api';
 
-  // ── Toast ────────────────────────────────
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
@@ -408,7 +412,6 @@
     setTimeout(() => { t.className = ''; }, 3000);
   }
 
-  // ── Validation helpers ───────────────────
   function setError(inputId, errorId, hasError) {
     document.getElementById(inputId).classList.toggle('input-invalid', hasError);
     document.getElementById(errorId).classList.toggle('visible', hasError);
@@ -418,30 +421,44 @@
     pairs.forEach(([i, e]) => setError(i, e, false));
   }
 
-  // ── Button loading state ─────────────────
   function setLoading(btnId, loading) {
     const btn = document.getElementById(btnId);
     btn.classList.toggle('is-loading', loading);
-    if (loading) { btn.dataset.orig = btn.textContent; btn.textContent = '⏳ Saving...'; }
-    else btn.textContent = btn.dataset.orig || 'Save';
+    if (loading) {
+      btn.dataset.orig = btn.textContent;
+      btn.textContent = '⏳ Saving...';
+    } else {
+      btn.textContent = btn.dataset.orig || 'Save';
+    }
   }
 
-  // ── Escape quotes for inline onclick attrs ─
-  function esc(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+  function esc(s) {
+    return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
 
-  // ── Format datetime for display ──────────
   function fmtDate(d) {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-CA');
   }
 
-  // ════════════════════════════════════════
+  function toDateTimeLocalValue(d) {
+  if (!d) return '';
+  try {
+    let s = String(d).trim().replace(',', '').replace(' ', 'T');
+    const match = s.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+    if (match) return `${match[1]}T${match[2]}`;
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '';
+    const pad = n => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  } catch { return ''; }
+}
+
   // COURSES
-  // ════════════════════════════════════════
 
   async function loadCourses() {
     try {
-      const res     = await fetch(`${API}/courses`);
+      const res = await fetch(`${API}/courses`);
       const courses = await res.json();
       renderCourses(courses);
     } catch {
@@ -485,12 +502,14 @@
     const name = document.getElementById(`${p}-name`).value.trim();
     const inst = document.getElementById(`${p}-instructor`).value.trim();
     const term = document.getElementById(`${p}-term`).value.trim();
-    const max  = document.getElementById(`${p}-max`).value.trim();
-    setError(`${p}-code`,       `err-${p}-code`,       !code);
-    setError(`${p}-name`,       `err-${p}-name`,       !name);
+    const max = document.getElementById(`${p}-max`).value.trim();
+
+    setError(`${p}-code`, `err-${p}-code`, !code);
+    setError(`${p}-name`, `err-${p}-name`, !name);
     setError(`${p}-instructor`, `err-${p}-instructor`, !inst);
-    setError(`${p}-term`,       `err-${p}-term`,       !term);
-    setError(`${p}-max`,        `err-${p}-max`,        !max || isNaN(max) || +max < 1 || +max > 999);
+    setError(`${p}-term`, `err-${p}-term`, !term);
+    setError(`${p}-max`, `err-${p}-max`, !max || isNaN(max) || +max < 1 || +max > 999);
+
     return code && name && inst && term && max && !isNaN(max) && +max >= 1 && +max <= 999;
   }
 
@@ -502,12 +521,12 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          course_code:  document.getElementById('add-code').value.trim(),
-          course_name:  document.getElementById('add-name').value.trim(),
-          instructor:   document.getElementById('add-instructor').value.trim(),
-          term:         document.getElementById('add-term').value.trim(),
+          course_code: document.getElementById('add-code').value.trim(),
+          course_name: document.getElementById('add-name').value.trim(),
+          instructor: document.getElementById('add-instructor').value.trim(),
+          term: document.getElementById('add-term').value.trim(),
           max_students: +document.getElementById('add-max').value,
-          is_enabled:   +document.getElementById('add-enabled').value
+          is_enabled: +document.getElementById('add-enabled').value
         })
       });
       const data = await res.json();
@@ -516,20 +535,28 @@
       window.location.hash = '';
       ['add-code','add-name','add-instructor','add-term','add-max'].forEach(id => document.getElementById(id).value = '');
       loadCourses();
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
-    finally { setLoading('btn-add-course', false); }
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    } finally {
+      setLoading('btn-add-course', false);
+    }
   }
 
   function openEditCourse(id, code, name, instructor, term, max, enabled) {
-    document.getElementById('edit-course-id').value  = id;
-    document.getElementById('edit-code').value        = code;
-    document.getElementById('edit-name').value        = name;
-    document.getElementById('edit-instructor').value  = instructor;
-    document.getElementById('edit-term').value        = term;
-    document.getElementById('edit-max').value         = max;
-    document.getElementById('edit-enabled').value     = enabled;
-    clearErrors([['edit-code','err-edit-code'],['edit-name','err-edit-name'],
-      ['edit-instructor','err-edit-instructor'],['edit-term','err-edit-term'],['edit-max','err-edit-max']]);
+    document.getElementById('edit-course-id').value = id;
+    document.getElementById('edit-code').value = code;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-instructor').value = instructor;
+    document.getElementById('edit-term').value = term;
+    document.getElementById('edit-max').value = max;
+    document.getElementById('edit-enabled').value = enabled;
+    clearErrors([
+      ['edit-code','err-edit-code'],
+      ['edit-name','err-edit-name'],
+      ['edit-instructor','err-edit-instructor'],
+      ['edit-term','err-edit-term'],
+      ['edit-max','err-edit-max']
+    ]);
   }
 
   async function submitEditCourse() {
@@ -541,12 +568,12 @@
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          course_code:  document.getElementById('edit-code').value.trim(),
-          course_name:  document.getElementById('edit-name').value.trim(),
-          instructor:   document.getElementById('edit-instructor').value.trim(),
-          term:         document.getElementById('edit-term').value.trim(),
+          course_code: document.getElementById('edit-code').value.trim(),
+          course_name: document.getElementById('edit-name').value.trim(),
+          instructor: document.getElementById('edit-instructor').value.trim(),
+          term: document.getElementById('edit-term').value.trim(),
           max_students: +document.getElementById('edit-max').value,
-          is_enabled:   +document.getElementById('edit-enabled').value
+          is_enabled: +document.getElementById('edit-enabled').value
         })
       });
       const data = await res.json();
@@ -554,43 +581,44 @@
       showToast('Course updated!');
       window.location.hash = '';
       loadCourses();
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
-    finally { setLoading('btn-edit-course', false); }
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    } finally {
+      setLoading('btn-edit-course', false);
+    }
   }
 
   async function deleteCourse(id, code) {
     if (!confirm(`Delete course "${code}"? This cannot be undone.`)) return;
     try {
-      const res  = await fetch(`${API}/courses/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/courses/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       showToast(`"${code}" deleted.`);
       loadCourses();
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    }
   }
 
-  // ════════════════════════════════════════
   // ASSESSMENTS
-  // (uses your /api/templates route since
-  //  assessments are stored as templates)
-  // ════════════════════════════════════════
 
   async function loadAssessments() {
     try {
-      // Load courses first so we know which course IDs to fetch templates for
-      const res     = await fetch(`${API}/courses`);
+      const res = await fetch(`${API}/courses`);
       const courses = await res.json();
 
-      // Fetch templates for ALL courses and merge into one list
       const all = [];
       for (const c of courses) {
-        const r    = await fetch(`${API}/templates/${c.id}`);
+        const r = await fetch(`${API}/templates/${c.id}`);
         const tmpl = await r.json();
-        // Filter: assessments = non-exam categories
         const assessments = tmpl.filter(t =>
           !['Midterm','Final','Quiz','Quizzes'].includes(t.category)
         );
-        assessments.forEach(t => { t._courseCode = c.course_code; t._courseId = c.id; });
+        assessments.forEach(t => {
+          t._courseCode = c.course_code;
+          t._courseId = c.id;
+        });
         all.push(...assessments);
       }
       renderAssessments(all);
@@ -613,14 +641,18 @@
         <td>
           <select name="categories" size="1">
             <option>— Select —</option>
-            <option ${t.category==='Assignment'?'selected':''}>Assignments</option>
-            <option ${t.category==='Lab'?'selected':''}>Labs</option>
-            <option ${t.category==='Project'?'selected':''}>Projects</option>
-            <option ${t.category==='Quiz'?'selected':''}>Quizzes</option>
+            <option ${t.category==='Assignment' ? 'selected' : ''}>Assignments</option>
+            <option ${t.category==='Lab' ? 'selected' : ''}>Labs</option>
+            <option ${t.category==='Project' ? 'selected' : ''}>Projects</option>
+            <option ${t.category==='Quiz' ? 'selected' : ''}>Quizzes</option>
           </select>
         </td>
-        <td><input type="datetime-local" class="plain-text"></td>
-        <td><input type="datetime-local" class="plain-text"></td>
+        <td>
+          <input type="datetime-local" class="plain-text" value="${toDateTimeLocalValue(t.released_date)}" onchange="updateTemplateField(${t.id},'released_date',this.value)">
+        </td>
+        <td>
+          <input type="datetime-local" class="plain-text" value="${toDateTimeLocalValue(t.due_date)}" onchange="updateTemplateField(${t.id},'due_date',this.value)">
+        </td>
         <td><input type="text" value="${t.weight}%" class="plain-text"/></td>
         <td><textarea class="plain-text desc-field" rows="1">${t.description || ''}</textarea></td>
         <td>
@@ -633,34 +665,40 @@
   }
 
   function validateAssessmentForm() {
-    const course    = document.getElementById('ass-course').value.trim();
-    const name      = document.getElementById('ass-name').value.trim();
-    const category  = document.getElementById('ass-category').value;
-    const weight    = document.getElementById('ass-weight').value.trim();
-    setError('ass-course',    'err-ass-course',    !course);
-    setError('ass-name',      'err-ass-name',      !name);
-    setError('ass-category',  'err-ass-category',  !category);
-    setError('ass-weight',    'err-ass-weight',    weight===''||isNaN(weight)||+weight<0||+weight>100);
+    const course = document.getElementById('ass-course').value.trim();
+    const name = document.getElementById('ass-name').value.trim();
+    const category = document.getElementById('ass-category').value;
+    const weight = document.getElementById('ass-weight').value.trim();
+
+    setError('ass-course', 'err-ass-course', !course);
+    setError('ass-name', 'err-ass-name', !name);
+    setError('ass-category', 'err-ass-category', !category);
+    setError('ass-weight', 'err-ass-weight', weight === '' || isNaN(weight) || +weight < 0 || +weight > 100);
+
     return course && name && category && weight !== '' && !isNaN(weight) && +weight >= 0 && +weight <= 100;
   }
 
   async function submitAddAssessment() {
     if (!validateAssessmentForm()) return;
 
-    // Find the course ID from the course code entered
     const courseCode = document.getElementById('ass-course').value.trim();
     let courseId;
+
     try {
-      const res     = await fetch(`${API}/courses`);
+      const res = await fetch(`${API}/courses`);
       const courses = await res.json();
-      const found   = courses.find(c => c.course_code.toLowerCase() === courseCode.toLowerCase());
+      const found = courses.find(c => c.course_code.toLowerCase() === courseCode.toLowerCase());
+
       if (!found) {
         setError('ass-course', 'err-ass-course', true);
         document.getElementById('err-ass-course').textContent = `Course "${courseCode}" not found in database`;
         return;
       }
       courseId = found.id;
-    } catch { showToast('Cannot reach server', 'error'); return; }
+    } catch {
+      showToast('Cannot reach server', 'error');
+      return;
+    }
 
     setLoading('btn-add-assessment', true);
     try {
@@ -668,43 +706,49 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          course_id:       courseId,
+          course_id: courseId,
           assessment_name: document.getElementById('ass-name').value.trim(),
-          category:        document.getElementById('ass-category').value,
-          description:     document.getElementById('ass-desc').value.trim(),
-          due_date:        document.getElementById('ass-deadline').value || null,
-          weight:          +document.getElementById('ass-weight').value
+          category: document.getElementById('ass-category').value,
+          description: document.getElementById('ass-desc').value.trim(),
+          released_date: document.getElementById('ass-released').value || null,
+          due_date: document.getElementById('ass-deadline').value || null,
+          weight: +document.getElementById('ass-weight').value
         })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       showToast('Assessment added!');
       window.location.hash = '';
-      ['ass-course','ass-name','ass-desc','ass-deadline','ass-released','ass-weight'].forEach(id => document.getElementById(id).value = '');
+      ['ass-course','ass-name','ass-desc','ass-deadline','ass-released','ass-weight'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
       document.getElementById('ass-category').value = '';
       loadAssessments();
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
-    finally { setLoading('btn-add-assessment', false); }
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    } finally {
+      setLoading('btn-add-assessment', false);
+    }
   }
 
-  // ════════════════════════════════════════
   // EXAMINATIONS
-  // ════════════════════════════════════════
 
   async function loadExaminations() {
     try {
-      const res     = await fetch(`${API}/courses`);
+      const res = await fetch(`${API}/courses`);
       const courses = await res.json();
 
       const all = [];
       for (const c of courses) {
-        const r    = await fetch(`${API}/templates/${c.id}`);
+        const r = await fetch(`${API}/templates/${c.id}`);
         const tmpl = await r.json();
-        // Filter: examinations = exam-type categories
         const exams = tmpl.filter(t =>
           ['Midterm','Final','Quiz','Quizzes','Exam'].includes(t.category)
         );
-        exams.forEach(t => { t._courseCode = c.course_code; t._courseId = c.id; });
+        exams.forEach(t => {
+          t._courseCode = c.course_code;
+          t._courseId = c.id;
+        });
         all.push(...exams);
       }
       renderExaminations(all);
@@ -727,13 +771,15 @@
         <td>
           <select name="categories" size="1">
             <option>— Select —</option>
-            <option ${t.category==='Quiz'||t.category==='Quizzes'?'selected':''}>Quizzes</option>
-            <option ${t.category==='Lab'?'selected':''}>Labs</option>
-            <option ${t.category==='Midterm'?'selected':''}>Midterm</option>
-            <option ${t.category==='Final'?'selected':''}>Final</option>
+            <option ${t.category==='Quiz' || t.category==='Quizzes' ? 'selected' : ''}>Quizzes</option>
+            <option ${t.category==='Lab' ? 'selected' : ''}>Labs</option>
+            <option ${t.category==='Midterm' ? 'selected' : ''}>Midterm</option>
+            <option ${t.category==='Final' ? 'selected' : ''}>Final</option>
           </select>
         </td>
-        <td><input type="datetime-local" class="plain-text"></td>
+        <td>
+          <input type="datetime-local" class="plain-text" value="${toDateTimeLocalValue(t.due_date)}" onchange="updateTemplateField(${t.id},'due_date',this.value)">
+        </td>
         <td><input type="text" value="${t.weight}%" class="plain-text"/></td>
         <td><textarea class="plain-text desc-field" rows="1">${t.description || ''}</textarea></td>
         <td>
@@ -746,14 +792,16 @@
   }
 
   function validateExamForm() {
-    const course   = document.getElementById('exam-course').value.trim();
-    const name     = document.getElementById('exam-name').value.trim();
+    const course = document.getElementById('exam-course').value.trim();
+    const name = document.getElementById('exam-name').value.trim();
     const category = document.getElementById('exam-category').value;
-    const weight   = document.getElementById('exam-weight').value.trim();
-    setError('exam-course',    'err-exam-course',    !course);
-    setError('exam-name',      'err-exam-name',      !name);
-    setError('exam-category',  'err-exam-category',  !category);
-    setError('exam-weight',    'err-exam-weight',    weight===''||isNaN(weight)||+weight<0||+weight>100);
+    const weight = document.getElementById('exam-weight').value.trim();
+
+    setError('exam-course', 'err-exam-course', !course);
+    setError('exam-name', 'err-exam-name', !name);
+    setError('exam-category', 'err-exam-category', !category);
+    setError('exam-weight', 'err-exam-weight', weight === '' || isNaN(weight) || +weight < 0 || +weight > 100);
+
     return course && name && category && weight !== '' && !isNaN(weight) && +weight >= 0 && +weight <= 100;
   }
 
@@ -762,17 +810,22 @@
 
     const courseCode = document.getElementById('exam-course').value.trim();
     let courseId;
+
     try {
-      const res     = await fetch(`${API}/courses`);
+      const res = await fetch(`${API}/courses`);
       const courses = await res.json();
-      const found   = courses.find(c => c.course_code.toLowerCase() === courseCode.toLowerCase());
+      const found = courses.find(c => c.course_code.toLowerCase() === courseCode.toLowerCase());
+
       if (!found) {
         setError('exam-course', 'err-exam-course', true);
         document.getElementById('err-exam-course').textContent = `Course "${courseCode}" not found`;
         return;
       }
       courseId = found.id;
-    } catch { showToast('Cannot reach server', 'error'); return; }
+    } catch {
+      showToast('Cannot reach server', 'error');
+      return;
+    }
 
     setLoading('btn-add-exam', true);
     try {
@@ -780,39 +833,59 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          course_id:       courseId,
+          course_id: courseId,
           assessment_name: document.getElementById('exam-name').value.trim(),
-          category:        document.getElementById('exam-category').value,
-          description:     document.getElementById('exam-desc').value.trim(),
-          due_date:        document.getElementById('exam-date').value || null,
-          weight:          +document.getElementById('exam-weight').value
+          category: document.getElementById('exam-category').value,
+          description: document.getElementById('exam-desc').value.trim(),
+          due_date: document.getElementById('exam-date').value || null,
+          weight: +document.getElementById('exam-weight').value
         })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       showToast('Examination added!');
       window.location.hash = '';
-      ['exam-course','exam-name','exam-desc','exam-date','exam-weight'].forEach(id => document.getElementById(id).value = '');
+      ['exam-course','exam-name','exam-desc','exam-date','exam-weight'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
       document.getElementById('exam-category').value = '';
       loadExaminations();
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
-    finally { setLoading('btn-add-exam', false); }
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    } finally {
+      setLoading('btn-add-exam', false);
+    }
   }
 
-  // ── Shared delete for both assessments & examinations ──
   async function deleteTemplate(id, name, type) {
     if (!confirm(`Delete ${type} "${name}"? This cannot be undone.`)) return;
     try {
-      const res  = await fetch(`${API}/templates/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/templates/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       showToast(`"${name}" deleted.`);
       loadAssessments();
       loadExaminations();
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    }
   }
 
-  // ── Load everything on page open ──
+  async function updateTemplateField(id, field, value) {
+    try {
+      const res = await fetch(`${API}/templates/${id}/field`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field, value: value || null })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast('Saved!');
+    } catch (err) {
+      showToast('Failed to save: ' + err.message, 'error');
+    }
+  }
+
   loadCourses();
   loadAssessments();
   loadExaminations();
