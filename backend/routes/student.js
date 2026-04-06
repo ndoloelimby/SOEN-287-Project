@@ -4,6 +4,45 @@ const db = require('../db');
 
 const getStudentId = () => 1; // temporary until auth is ready
 
+function sendServerError(res, err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong. Please try again.' });
+}
+
+function parsePositiveInteger(value) {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function normalizeCourseCode(value) {
+    return String(value || '')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toUpperCase();
+}
+
+function compactCourseCode(value) {
+    return normalizeCourseCode(value).replace(/\s+/g, '');
+}
+
+function validateCourseCode(value) {
+    const normalized = normalizeCourseCode(value);
+
+    if (!normalized) {
+        return 'Please enter a course code.';
+    }
+
+    if (normalized.length > 20) {
+        return 'Course code is too long.';
+    }
+
+    if (!/^[A-Z]{3,4}\s?\d{3}[A-Z]?$/.test(normalized)) {
+        return 'Enter a valid course code like SOEN 287.';
+    }
+
+    return null;
+}
+
 // GET student profile
 router.get('/account', (req, res) => {
     const studentId = getStudentId();
@@ -20,7 +59,7 @@ router.get('/account', (req, res) => {
         LIMIT 1`,
         [studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             if (results.length === 0) {
                 return res.status(404).json({ error: 'Student not found' });
             }
@@ -53,7 +92,7 @@ router.get('/enrollments', (req, res) => {
         ORDER BY e.enrolled_at DESC`,
         [studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             res.json(results);
         }
     );
@@ -62,45 +101,85 @@ router.get('/enrollments', (req, res) => {
 // JOIN a course by code
 router.post('/enroll', (req, res) => {
     const studentId = getStudentId();
-    const courseCode = req.body.course_code || req.body.code;
+    const rawCourseCode = req.body.course_code || req.body.code;
+    const courseCodeError = validateCourseCode(rawCourseCode);
+    const normalizedCourseCode = normalizeCourseCode(rawCourseCode);
+    const courseCodeLookup = compactCourseCode(rawCourseCode);
 
-    if (!courseCode) {
-        return res.status(400).json({ error: 'course_code is required' });
+    if (courseCodeError) {
+        return res.status(400).json({ error: courseCodeError });
     }
 
     db.query(
-        'SELECT id, course_code, course_name FROM courses WHERE course_code = ? LIMIT 1',
-        [courseCode],
+        `SELECT
+            id,
+            course_code,
+            course_name,
+            max_students,
+            is_enabled
+        FROM courses
+        WHERE UPPER(REPLACE(course_code, ' ', '')) = ?
+        LIMIT 1`,
+        [courseCodeLookup],
         (courseErr, courseResults) => {
-            if (courseErr) return res.status(500).json({ error: courseErr.message });
+            if (courseErr) return sendServerError(res, courseErr);
             if (courseResults.length === 0) {
-                return res.status(404).json({ error: 'Course not found' });
+                return res.status(404).json({
+                    error: `Course ${normalizedCourseCode} was not found.`
+                });
             }
 
             const course = courseResults[0];
+
+            if (!course.is_enabled) {
+                return res.status(409).json({
+                    error: `${course.course_code} is not open for enrollment right now.`
+                });
+            }
 
             db.query(
                 'SELECT id FROM enrollments WHERE student_id = ? AND course_id = ? LIMIT 1',
                 [studentId, course.id],
                 (enrollmentErr, enrollmentResults) => {
                     if (enrollmentErr) {
-                        return res.status(500).json({ error: enrollmentErr.message });
+                        return sendServerError(res, enrollmentErr);
                     }
                     if (enrollmentResults.length > 0) {
-                        return res.status(409).json({ error: 'Student is already enrolled in this course' });
+                        return res.status(409).json({
+                            error: `You are already enrolled in ${course.course_code}.`
+                        });
                     }
 
                     db.query(
-                        'INSERT INTO enrollments (student_id, course_id, enrolled_at) VALUES (?, ?, NOW())',
-                        [studentId, course.id],
-                        (insertErr, result) => {
-                            if (insertErr) return res.status(500).json({ error: insertErr.message });
+                        'SELECT COUNT(*) AS enrolled_count FROM enrollments WHERE course_id = ?',
+                        [course.id],
+                        (countErr, countResults) => {
+                            if (countErr) return sendServerError(res, countErr);
 
-                            res.status(201).json({
-                                message: 'Enrollment created',
-                                enrollment_id: result.insertId,
-                                course
-                            });
+                            const enrolledCount = Number(countResults[0]?.enrolled_count || 0);
+                            const maxStudents = course.max_students === null
+                                ? null
+                                : Number(course.max_students);
+
+                            if (maxStudents !== null && enrolledCount >= maxStudents) {
+                                return res.status(409).json({
+                                    error: `${course.course_code} is already full.`
+                                });
+                            }
+
+                            db.query(
+                                'INSERT INTO enrollments (student_id, course_id, enrolled_at) VALUES (?, ?, NOW())',
+                                [studentId, course.id],
+                                (insertErr, result) => {
+                                    if (insertErr) return sendServerError(res, insertErr);
+
+                                    res.status(201).json({
+                                        message: 'Enrollment created',
+                                        enrollment_id: result.insertId,
+                                        course
+                                    });
+                                }
+                            );
                         }
                     );
                 }
@@ -112,13 +191,17 @@ router.post('/enroll', (req, res) => {
 // LEAVE a course
 router.delete('/enroll/:id', (req, res) => {
     const studentId = getStudentId();
-    const { id } = req.params;
+    const enrollmentId = parsePositiveInteger(req.params.id);
+
+    if (!enrollmentId) {
+        return res.status(400).json({ error: 'Please provide a valid enrollment id.' });
+    }
 
     db.query(
         'DELETE FROM enrollments WHERE id = ? AND student_id = ?',
-        [id, studentId],
+        [enrollmentId, studentId],
         (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Enrollment not found' });
             }
@@ -160,7 +243,7 @@ router.get('/dashboard', (req, res) => {
         ORDER BY a.due_date ASC`,
         [studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             res.json(results);
         }
     );

@@ -6,16 +6,164 @@ const { Parser } = require('json2csv');
 
 const getStudentId = () => 1; // temporary until auth is ready
 
+function sendServerError(res, err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong. Please try again.' });
+}
+
+function parsePositiveInteger(value) {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function validateDateOnly(value) {
+    if (value === null || value === undefined || value === '') {
+        return { value: null };
+    }
+
+    if (typeof value !== 'string') {
+        return { error: 'Please enter a valid due date.' };
+    }
+
+    const trimmed = value.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        return { error: 'Please enter a valid due date.' };
+    }
+
+    const [year, month, day] = trimmed.split('-').map(Number);
+    const parsedDate = new Date(`${trimmed}T00:00:00`);
+
+    if (
+        Number.isNaN(parsedDate.getTime()) ||
+        parsedDate.getUTCFullYear() !== year ||
+        parsedDate.getUTCMonth() + 1 !== month ||
+        parsedDate.getUTCDate() !== day
+    ) {
+        return { error: 'Please enter a valid due date.' };
+    }
+
+    return { value: trimmed };
+}
+
+function validateOptionalNumber(value, label, options = {}) {
+    const {
+        min = 0,
+        max = null,
+        allowZero = true
+    } = options;
+
+    if (value === null || value === undefined || value === '') {
+        return { value: null };
+    }
+
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+        return { error: `${label} must be a valid number.` };
+    }
+
+    if (parsed < min || (!allowZero && parsed === 0)) {
+        const minimumLabel = allowZero ? min : min || 0;
+        return { error: `${label} must be greater than ${minimumLabel}.` };
+    }
+
+    if (max !== null && parsed > max) {
+        return { error: `${label} cannot be greater than ${max}.` };
+    }
+
+    return { value: parsed };
+}
+
+function validateGradePayload(body, options = {}) {
+    const { requireCourseId = true } = options;
+    const courseId = parsePositiveInteger(body.course_id);
+    const assessmentName = String(body.assessment_name || '').trim();
+    const category = body.category === null || body.category === undefined
+        ? ''
+        : String(body.category).trim();
+    const status = String(body.status || 'pending').trim().toLowerCase();
+
+    if (requireCourseId && !courseId) {
+        return { error: 'Please choose a valid course.' };
+    }
+
+    if (!assessmentName) {
+        return { error: 'Assessment name is required.' };
+    }
+
+    if (assessmentName.length > 100) {
+        return { error: 'Assessment name must be 100 characters or fewer.' };
+    }
+
+    if (category.length > 50) {
+        return { error: 'Assessment category must be 50 characters or fewer.' };
+    }
+
+    const dueDateResult = validateDateOnly(body.due_date);
+    if (dueDateResult.error) {
+        return { error: dueDateResult.error };
+    }
+
+    const weightResult = validateOptionalNumber(body.weight, 'Weight', {
+        min: 0,
+        max: 100
+    });
+    if (weightResult.error) {
+        return { error: weightResult.error };
+    }
+
+    const earnedMarksResult = validateOptionalNumber(body.earned_marks, 'Earned marks', {
+        min: 0
+    });
+    if (earnedMarksResult.error) {
+        return { error: earnedMarksResult.error };
+    }
+
+    const totalMarksResult = validateOptionalNumber(body.total_marks, 'Total marks', {
+        min: 0,
+        allowZero: false
+    });
+    if (totalMarksResult.error) {
+        return { error: totalMarksResult.error };
+    }
+
+    if ((earnedMarksResult.value === null) !== (totalMarksResult.value === null)) {
+        return {
+            error: 'Earned marks and total marks must both be filled in or both be left empty.'
+        };
+    }
+
+    if (!['pending', 'completed'].includes(status)) {
+        return { error: 'Status must be either pending or completed.' };
+    }
+
+    return {
+        value: {
+            course_id: courseId,
+            assessment_name: assessmentName,
+            category,
+            due_date: dueDateResult.value,
+            weight: weightResult.value,
+            earned_marks: earnedMarksResult.value,
+            total_marks: totalMarksResult.value,
+            status
+        }
+    };
+}
+
 // GET all grades for a course
 router.get('/:courseId', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
     const studentId = getStudentId();
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         'SELECT * FROM student_grades WHERE course_id = ? AND student_id = ? ORDER BY due_date IS NULL, due_date ASC, created_at ASC, id ASC',
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             res.json(results);
         }
     );
@@ -23,8 +171,12 @@ router.get('/:courseId', (req, res) => {
 
 // GET student-entered assessments for a course details page
 router.get('/:courseId/details', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
     const studentId = getStudentId();
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         `SELECT
@@ -43,7 +195,7 @@ router.get('/:courseId/details', (req, res) => {
         ORDER BY due_date IS NULL, due_date ASC, created_at ASC, id ASC`,
         [studentId, courseId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             res.json(results);
         }
     );
@@ -52,6 +204,12 @@ router.get('/:courseId/details', (req, res) => {
 // ADD a new student-owned assessment
 router.post('/', (req, res) => {
     const studentId = getStudentId();
+    const validation = validateGradePayload(req.body, { requireCourseId: true });
+
+    if (validation.error) {
+        return res.status(400).json({ error: validation.error });
+    }
+
     const {
         course_id,
         assessment_name,
@@ -61,35 +219,59 @@ router.post('/', (req, res) => {
         earned_marks,
         total_marks,
         status
-    } = req.body;
+    } = validation.value;
 
     db.query(
-        `INSERT INTO student_grades
-        (student_id, course_id, assessment_name, category,
-        due_date, weight, earned_marks, total_marks, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-        [
-            studentId,
-            course_id,
-            assessment_name,
-            category,
-            due_date || null,
-            weight ?? null,
-            earned_marks ?? null,
-            total_marks ?? null,
-            status || 'pending'
-        ],
-        (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Grade added!', id: result.insertId });
+        'SELECT id FROM courses WHERE id = ? LIMIT 1',
+        [course_id],
+        (courseErr, courseResults) => {
+            if (courseErr) return sendServerError(res, courseErr);
+            if (courseResults.length === 0) {
+                return res.status(404).json({ error: 'The selected course was not found.' });
+            }
+
+            db.query(
+                `INSERT INTO student_grades
+                (student_id, course_id, assessment_name, category,
+                due_date, weight, earned_marks, total_marks, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+                [
+                    studentId,
+                    course_id,
+                    assessment_name,
+                    category,
+                    due_date,
+                    weight,
+                    earned_marks,
+                    total_marks,
+                    status
+                ],
+                (err, result) => {
+                    if (err) return sendServerError(res, err);
+                    res.json({ message: 'Grade added!', id: result.insertId });
+                }
+            );
         }
     );
 });
 
 // EDIT a grade
 router.put('/:id', (req, res) => {
-    const { id } = req.params;
+    const gradeId = parsePositiveInteger(req.params.id);
+    const studentId = getStudentId();
+
+    if (!gradeId) {
+        return res.status(400).json({ error: 'Please provide a valid assessment id.' });
+    }
+
+    const validation = validateGradePayload(req.body, { requireCourseId: true });
+
+    if (validation.error) {
+        return res.status(400).json({ error: validation.error });
+    }
+
     const {
+        course_id,
         assessment_name,
         category,
         due_date,
@@ -97,45 +279,61 @@ router.put('/:id', (req, res) => {
         earned_marks,
         total_marks,
         status
-    } = req.body;
+    } = validation.value;
 
     db.query(
-        `UPDATE student_grades SET
-        assessment_name = ?, category = ?, due_date = ?,
-        weight = ?, earned_marks = ?, total_marks = ?, status = ?,
-        updated_at = NOW()
-        WHERE id = ? AND student_id = ?`,
-        [
-            assessment_name,
-            category,
-            due_date || null,
-            weight ?? null,
-            earned_marks ?? null,
-            total_marks ?? null,
-            status,
-            id,
-            getStudentId()
-        ],
-        (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'Grade not found' });
+        'SELECT id FROM courses WHERE id = ? LIMIT 1',
+        [course_id],
+        (courseErr, courseResults) => {
+            if (courseErr) return sendServerError(res, courseErr);
+            if (courseResults.length === 0) {
+                return res.status(404).json({ error: 'The selected course was not found.' });
             }
 
-            res.json({ message: 'Grade updated!' });
+            db.query(
+                `UPDATE student_grades SET
+                course_id = ?, assessment_name = ?, category = ?, due_date = ?,
+                weight = ?, earned_marks = ?, total_marks = ?, status = ?,
+                updated_at = NOW()
+                WHERE id = ? AND student_id = ?`,
+                [
+                    course_id,
+                    assessment_name,
+                    category,
+                    due_date,
+                    weight,
+                    earned_marks,
+                    total_marks,
+                    status,
+                    gradeId,
+                    studentId
+                ],
+                (err, result) => {
+                    if (err) return sendServerError(res, err);
+                    if (result.affectedRows === 0) {
+                        return res.status(404).json({ error: 'Grade not found' });
+                    }
+
+                    res.json({ message: 'Grade updated!' });
+                }
+            );
         }
     );
 });
 
 // DELETE a grade
 router.delete('/:id', (req, res) => {
-    const { id } = req.params;
+    const gradeId = parsePositiveInteger(req.params.id);
+
+    if (!gradeId) {
+        return res.status(400).json({ error: 'Please provide a valid assessment id.' });
+    }
 
     db.query(
         'DELETE FROM student_grades WHERE id = ? AND student_id = ?',
-        [id, getStudentId()],
+        [gradeId, getStudentId()],
         (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Grade not found' });
             }
@@ -147,8 +345,12 @@ router.delete('/:id', (req, res) => {
 
 // GET weighted average for a course
 router.get('/:courseId/average', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
     const studentId = getStudentId();
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         `SELECT
@@ -162,7 +364,7 @@ router.get('/:courseId/average', (req, res) => {
         AND total_marks <> 0`,
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
 
             const weightedPoints = results.reduce((sum, row) => {
                 const weight = parseFloat(row.weight || 0);
@@ -201,7 +403,7 @@ router.get('/gpa/all', (req, res) => {
         AND total_marks <> 0`,
         [studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
 
             const gpaScale = (avg) => {
                 if (avg >= 90) return 4.3;
@@ -253,7 +455,11 @@ router.get('/gpa/all', (req, res) => {
 
 // GET all grades for a course (admin view)
 router.get('/:courseId/all', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         `SELECT assessment_name, category,
@@ -264,7 +470,7 @@ router.get('/:courseId/all', (req, res) => {
          GROUP BY assessment_name, category`,
         [courseId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
             res.json(results);
         }
     );
@@ -272,8 +478,12 @@ router.get('/:courseId/all', (req, res) => {
 
 // GET analytics data for a course
 router.get('/:courseId/analytics', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
     const studentId = getStudentId();
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         `SELECT
@@ -297,7 +507,7 @@ router.get('/:courseId/analytics', (req, res) => {
         ORDER BY due_date IS NULL, due_date ASC, created_at ASC, id ASC`,
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
 
             const assessments = results.map((row) => ({
                 ...row,
@@ -344,8 +554,12 @@ router.get('/:courseId/analytics', (req, res) => {
 
 // EXPORT to CSV
 router.get('/:courseId/export/csv', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
     const studentId = getStudentId();
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         `SELECT
@@ -356,7 +570,7 @@ router.get('/:courseId/export/csv', (req, res) => {
         WHERE course_id = ? AND student_id = ?`,
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
 
             const fields = [
                 { label: 'Assessment', value: 'assessment_name' },
@@ -381,8 +595,12 @@ router.get('/:courseId/export/csv', (req, res) => {
 
 // EXPORT to PDF
 router.get('/:courseId/export/pdf', (req, res) => {
-    const { courseId } = req.params;
+    const courseId = parsePositiveInteger(req.params.courseId);
     const studentId = getStudentId();
+
+    if (!courseId) {
+        return res.status(400).json({ error: 'Please provide a valid course id.' });
+    }
 
     db.query(
         `SELECT
@@ -393,7 +611,7 @@ router.get('/:courseId/export/pdf', (req, res) => {
         WHERE course_id = ? AND student_id = ?`,
         [courseId, studentId],
         (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+            if (err) return sendServerError(res, err);
 
             const doc = new PDFDocument({ margin: 40 });
 

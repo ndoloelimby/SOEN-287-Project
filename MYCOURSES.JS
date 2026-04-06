@@ -26,6 +26,31 @@ const agendaMessage = document.getElementById('agendaMessage');
 const agendaList = document.getElementById('agendaList');
 const AGENDA_STORAGE_KEY = 'mycourses.agendaTasks';
 
+function normalizeCourseCode(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toUpperCase();
+}
+
+function validateCourseCodeInput(value) {
+  const normalized = normalizeCourseCode(value);
+
+  if (!normalized) {
+    return 'Please enter a course code.';
+  }
+
+  if (normalized.length > 20) {
+    return 'Course code is too long.';
+  }
+
+  if (!/^[A-Z]{3,4}\s?\d{3}[A-Z]?$/.test(normalized)) {
+    return 'Enter a valid course code like SOEN 287.';
+  }
+
+  return '';
+}
+
 function loadAgendaTasks() {
   try {
     const storedValue = localStorage.getItem(AGENDA_STORAGE_KEY);
@@ -105,6 +130,11 @@ function addAgendaTask() {
     return;
   }
 
+  if (text.length > 120) {
+    showAgendaMessage('Agenda items must be 120 characters or fewer.', 'error');
+    return;
+  }
+
   const tasks = loadAgendaTasks();
   tasks.push({
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -118,8 +148,9 @@ function addAgendaTask() {
   renderAgenda();
   agendaTaskInput.focus();
 }
-function normalizeCourseCode(value) {
-  return String(value || '').replace(/\s+/g, '').toUpperCase();
+
+function normalizeCourseCodeKey(value) {
+  return normalizeCourseCode(value).replace(/\s+/g, '');
 }
 
 function getCourseTitle(course) {
@@ -135,7 +166,7 @@ function getCourseSubtitle(course) {
 }
 
 function getCourseHref(course) {
-  const normalized = normalizeCourseCode(course.course_code);
+  const normalized = normalizeCourseCodeKey(course.course_code);
   return detailPageByCourseCode[normalized] || '#';
 }
 
@@ -342,7 +373,14 @@ async function loadEnrollments() {
 }
 
 async function enrollCourse() {
-  const courseCode = enrollInput.value.trim();
+  const courseCode = normalizeCourseCode(enrollInput.value);
+  const courseCodeError = validateCourseCodeInput(courseCode);
+
+  if (courseCodeError) {
+    showEnrollmentMessage(courseCodeError, 'error');
+    enrollInput.focus();
+    return;
+  }
 
   try {
     const response = await fetch(`${API_BASE}/enroll`, {

@@ -71,6 +71,68 @@ async function fetchJson(url, options) {
     return payload;
 }
 
+function validateDateInput(value) {
+    if (!value) return null;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return 'Please enter a valid due date.';
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+    const parsedDate = new Date(`${value}T00:00:00`);
+
+    if (
+        Number.isNaN(parsedDate.getTime()) ||
+        parsedDate.getUTCFullYear() !== year ||
+        parsedDate.getUTCMonth() + 1 !== month ||
+        parsedDate.getUTCDate() !== day
+    ) {
+        return 'Please enter a valid due date.';
+    }
+
+    return null;
+}
+
+function validateAssessmentPayload(payload) {
+    if (!payload.assessment_name) {
+        return 'Assessment name is required.';
+    }
+
+    if (payload.assessment_name.length > 100) {
+        return 'Assessment name must be 100 characters or fewer.';
+    }
+
+    if ((payload.category || '').length > 50) {
+        return 'Assessment type must be 50 characters or fewer.';
+    }
+
+    const dueDateError = validateDateInput(payload.due_date);
+    if (dueDateError) {
+        return dueDateError;
+    }
+
+    if (payload.weight !== null && (payload.weight < 0 || payload.weight > 100)) {
+        return 'Weight must be between 0 and 100.';
+    }
+
+    if (payload.earned_marks !== null && payload.earned_marks < 0) {
+        return 'Earned marks cannot be negative.';
+    }
+
+    if (payload.total_marks !== null && payload.total_marks <= 0) {
+        return 'Total marks must be greater than 0.';
+    }
+
+    if ((payload.earned_marks === null) !== (payload.total_marks === null)) {
+        return 'Earned and total marks must both be filled or both be empty.';
+    }
+
+    if (!['pending', 'completed'].includes(payload.status)) {
+        return 'Please choose a valid status.';
+    }
+
+    return null;
+}
+
 function calculatePercentage(earnedMarks, totalMarks) {
     if (earnedMarks === null || earnedMarks === undefined || earnedMarks === '') return null;
     if (totalMarks === null || totalMarks === undefined || totalMarks === '' || Number(totalMarks) === 0) {
@@ -194,20 +256,9 @@ function buildPayloadFromRow(row, courseId) {
         status
     };
 
-    if (!payload.assessment_name) {
-        throw new Error('Assessment name is required.');
-    }
-
-    if ((payload.earned_marks === null) !== (payload.total_marks === null)) {
-        throw new Error('Earned and total marks must both be filled or both be empty.');
-    }
-
-    if (payload.total_marks !== null && payload.total_marks === 0) {
-        throw new Error('Total marks must be greater than 0.');
-    }
-
-    if (payload.weight !== null && payload.weight < 0) {
-        throw new Error('Weight cannot be negative.');
+    const validationError = validateAssessmentPayload(payload);
+    if (validationError) {
+        throw new Error(validationError);
     }
 
     return payload;
@@ -260,6 +311,7 @@ async function saveRow(id) {
         });
 
         await loadAssessments();
+        showFeedback('Assessment updated successfully.', 'success');
     } catch (error) {
         showFeedback(error.message);
     }
@@ -272,6 +324,7 @@ async function deleteRow(id) {
         clearFeedback();
         await fetchJson(`${API}/${id}`, { method: 'DELETE' });
         await loadAssessments();
+        showFeedback('Assessment deleted successfully.', 'success');
     } catch (error) {
         showFeedback(error.message);
     }
@@ -299,16 +352,9 @@ async function addAssessment() {
             status: document.getElementById('newStatus').value
         };
 
-        if (!payload.assessment_name) {
-            throw new Error('Please enter an assessment name.');
-        }
-
-        if ((payload.earned_marks === null) !== (payload.total_marks === null)) {
-            throw new Error('Earned and total marks must both be filled or both be empty.');
-        }
-
-        if (payload.total_marks !== null && payload.total_marks === 0) {
-            throw new Error('Total marks must be greater than 0.');
+        const validationError = validateAssessmentPayload(payload);
+        if (validationError) {
+            throw new Error(validationError);
         }
 
         validateWeightTotal(payload.weight);
@@ -321,6 +367,7 @@ async function addAssessment() {
 
         closeModal();
         await loadAssessments();
+        showFeedback('Assessment added successfully.', 'success');
     } catch (error) {
         showFeedback(error.message);
     }
