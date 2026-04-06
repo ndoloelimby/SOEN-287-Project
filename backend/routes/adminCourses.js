@@ -105,7 +105,10 @@ router.get('/templates/:courseId', (req, res) => {
     const { courseId } = req.params;
 
     db.query(
-        'SELECT * FROM assessment_templates WHERE course_id = ?',
+        `SELECT id, course_id, assessment_name, category, description, weight,
+        DATE_FORMAT(released_date, '%Y-%m-%dT%H:%i') AS released_date,
+        DATE_FORMAT(due_date, '%Y-%m-%dT%H:%i') AS due_date
+        FROM assessment_templates WHERE course_id = ?`,
         [courseId],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -121,19 +124,21 @@ router.post('/templates', (req, res) => {
         assessment_name,
         category,
         description,
+        released_date,
         due_date,
         weight
     } = req.body;
 
     db.query(
         `INSERT INTO assessment_templates
-        (course_id, assessment_name, category, description, due_date, weight)
-        VALUES (?, ?, ?, ?, ?, ?)`,
+        (course_id, assessment_name, category, description, released_date, due_date, weight)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
             course_id,
             assessment_name,
             category,
             description,
+            released_date || null,
             due_date,
             weight
         ],
@@ -144,7 +149,22 @@ router.post('/templates', (req, res) => {
     );
 });
 
-// EDIT an assessment template
+router.patch('/templates/:id/field', (req, res) => {
+    const { id } = req.params;
+    const { field, value } = req.body;
+    const allowed = ['released_date', 'due_date', 'assessment_name', 'category', 'description', 'weight'];
+    if (!allowed.includes(field)) return res.status(400).json({ error: 'Invalid field' });
+    db.query(
+        `UPDATE assessment_templates SET ${field} = ? WHERE id = ?`,
+        [value, id],
+        (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'Updated!' });
+        }
+    );
+});
+
+
 router.put('/templates/:id', (req, res) => {
     const { id } = req.params;
     const {
@@ -152,6 +172,7 @@ router.put('/templates/:id', (req, res) => {
         assessment_name,
         category,
         description,
+        released_date,
         due_date,
         weight
     } = req.body;
@@ -162,6 +183,7 @@ router.put('/templates/:id', (req, res) => {
         assessment_name = ?,
         category = ?,
         description = ?,
+        released_date = ?,
         due_date = ?,
         weight = ?
         WHERE id = ?`,
@@ -170,6 +192,7 @@ router.put('/templates/:id', (req, res) => {
             assessment_name,
             category,
             description,
+            released_date || null,
             due_date,
             weight,
             id
