@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Courses</title>
+<link rel="stylesheet" href="MYCOURSES.css">
+</head>
+
+<body>
+    <nav class = nav-bar> 
+        <div class="logo">Smart Course Companion - My Courses </div> 
+        
+        <div class="navlinks">
+            <a href="dashboardtrial.html"> Dashboard </a>
+            <a href="analytics.html"> Analytics </a>
+        </div>
+       
+    </nav>
+
+
+<div class="page">
+
+    <div class="middle">
+
+        <aside class="sidebar">
+        <ul>
+            
+            <li><a class = "active-course" href="Login_s.html">log out</a></li>
+            <li> <a class = "active-course"href="myaccount.html"> My Account </a></li>
+        </ul>
+        </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <input type="text" id="search" placeholder="Search courses...">
+
+            <select id="sort">
+                <option value="card">Card View</option>
+                <option value="name">Course Name Only</option>
+            </select>
+        </div>
+
+        <section class="cards" id="courseContainer"></section>
+
+        <div class="archived-panel">
+            <button id="toggleArchived">Hidden Courses ▼</button>
+            <div id="archivedContainer" class="hidden cards"></div> 
+        </div>
+
+       <div class="calendar-controls">
+    <div class="today-label">
+      <h3 id = "todayTitle"></h3>  
+    </div>
+</div>
+
+<div id="calendarContainer"></div>
+
+    </main>
+    </div>
+
+
+</div>
+
+
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle"></h3>
+        <button onclick="markDone()">Mark as Done</button>
+        <button onclick="closeModal()">Close</button> 
+    </div>
+</div>
+
+<script src="MYCOURSES.js"></script>
+</body>
+</html>

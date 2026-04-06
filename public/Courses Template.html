@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Courses Template</title>
+    <link rel="stylesheet" href="DesignCourseTemplate.css" />
+</head>
+<body>
+
+    <!--  TOP NAV -->
+   <div class="TopNav">
+        <h2>Smart Course Companion</h2>
+        <ul>
+            <a href="Admin Main Page.html">
+            <li id="dashboard"> DashBoard </li>
+            </a>
+            <a href="Courses Page.html">
+            <li id="courses"> Courses </li>
+            </a>
+             <a href="Analyticss.html">
+            <li id="grades&charts"> Analytics </li>
+            </a>
+            <a href="Courses Template.html">
+            <li id="Courses Template" style="background-color: rgb(130, 100, 136); border-radius: 15px;"> Courses Template
+            </li>
+            </a>
+            <a href="Settings.html">
+            <li id="Settings"> Settings </li>
+            </a>
+        </ul>
+
+        <!--  Icons for the lightmode and the logout Button -->
+        <div class="TopNavIcons">
+            <div class="lightmode">
+                <a href="">
+                    <img src="https://static.thenounproject.com/png/4808961-200.png"
+                         alt="light mode icon" />
+                </a>
+            </div>
+            <div class="Logout">
+                <a href="LOGIN_AD.html">
+                    <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png"
+                         alt="Logout icon" />
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="TemplateContainer">
+        <div class="TemplateGrid">
+
+            <!-- SAVED TEMPLATES TABLE -->
+            <div class="TemplateCard">
+                <h3>Saved Templates</h3>
+                <a href="#newTemplate" class="AddButton">+ New Template</a>
+
+                <div class="overflow-scroll">
+                    <table class="TemplatesTable">
+                        <tr class="Elements">
+                            <th>Template Name</th>
+                            <th>Department</th>
+                            <th>Assessments</th>
+                            <th>Total Weight</th>
+                            <th>Last Modified</th>
+                            <th>Actions</th>
+                        </tr>
+                        <tr>
+                            <th>Web Programming — SOEN 287</th>
+                            <td><span class="badge badge-soen">SOEN</span></td>
+                            <td>5</td>
+                            <td>100%</td>
+                            <td>Feb 20, 2026</td>
+                            <td>
+                                <div class="ActionGroup">
+                                    <a href="#applyTemplate1" class="BtnApply"> Apply</a>
+                                    <a href="#editTemplate1" class="BtnEdit">✏ Edit</a>
+                                    <a href="#" class="BtnDelete"><img src="https://cdn-icons-png.flaticon.com/512/3141/3141684.png" alt="Garbage Icon" /></a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>OOP II — COMP 249</th>
+                            <td><span class="badge badge-comp">COMP</span></td>
+                            <td>6</td>
+                            <td>100%</td>
+                            <td>Feb 18, 2026</td>
+                            <td>
+                                <div class="ActionGroup">
+                                    <a href="#applyTemplate2" class="BtnApply">Apply</a>
+                                    <a href="#editTemplate2" class="BtnEdit">✏ Edit</a>
+                                    <a href="#" class="BtnDelete"><img src="https://cdn-icons-png.flaticon.com/512/3141/3141684.png" alt="Garbage Icon" /></a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Applied Calculus — ENGR 233</th>
+                            <td><span class="badge badge-engr">ENGR</span></td>
+                            <td>4</td>
+                            <td>100%</td>
+                            <td>Feb 15, 2026</td>
+                            <td>
+                                <div class="ActionGroup">
+                                    <a href="#applyTemplate3" class="BtnApply"> Apply</a>
+                                    <a href="#editTemplate3" class="BtnEdit">✏ Edit</a>
+                                    <a href="#" class="BtnDelete"><img src="https://cdn-icons-png.flaticon.com/512/3141/3141684.png" alt="Garbage Icon" /></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TEMPLATE BUILDER -->
+            <div class="BuilderCard" id="newTemplate">
+                <h3>Template Builder</h3>
+
+                <div class="BuilderTopRow">
+                    <div class="BuilderField">
+                        <label>Template Name</label>
+                        <input type="text" placeholder="e.g. Web Programming Template" />
+                    </div>
+                    <div class="BuilderField">
+                        <label>Course Code Pattern</label>
+                        <input type="text" placeholder="e.g. SOEN 287" />
+                    </div>
+                    <div class="BuilderField">
+                        <label>Department</label>
+                        <select>
+                            <option value="">— Select —</option>
+                            <option>SOEN – Software Engineering</option>
+                            <option>COMP – Computer Science</option>
+                            <option>ENGR – Engineering</option>
+                            <option>MATH – Mathematics</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="AssessmentRowsHeader">
+                    <span>Assessment Name</span>
+                    <span>Category</span>
+                    <span>Weight (%)</span>
+                    <span></span>
+                </div>
+
+                <div class="AssessmentRow">
+                    <input type="text" placeholder="e.g. Project Delivery 1" />
+                    <select>
+                        <option value="">— Category —</option>
+                        <option>Assignment</option><option>Lab</option>
+                        <option>Quiz</option><option>Midterm</option>
+                        <option>Final Exam</option><option  selected>Project</option>
+                    </select>
+                    <input type="text" placeholder="10" />
+                    <a href="#" class="BtnRemoveRow">−</a>
+                </div>
+
+                <div class="AssessmentRow">
+                    <input type="text" placeholder="e.g. Midterm Exam" />
+                    <select>
+                        <option value="">— Category —</option>
+                        <option>Assignment</option><option>Lab</option>
+                        <option>Quiz</option><option selected>Midterm</option>
+                        <option>Final Exam</option><option>Project</option>
+                    </select>
+                    <input type="text" placeholder="20" />
+                    <a href="#" class="BtnRemoveRow">−</a>
+                </div>
+
+                <div class="AssessmentRow">
+                    <input type="text" placeholder="e.g. Final Exam" />
+                    <select>
+                        <option value="">— Category —</option>
+                        <option>Assignment</option><option>Lab</option>
+                        <option>Quiz</option><option>Midterm</option>
+                        <option selected>Final Exam</option><option>Project</option>
+                    </select>
+                    <input type="text" placeholder="30" />
+                    <a href="#" class="BtnRemoveRow">−</a>
+                </div>
+
+                <a href="#" class="BtnEdit" style="display:inline-block; margin-top:6px; font-size:13px;">+ Add Assessment Row</a>
+
+                <div class="PonderationBar">
+                    <span>Total Ponderation:</span>
+                    <div class="PonderationTrack">
+                        <div class="PonderationFill" style="width:60%;"></div>
+                    </div>
+                    <span class="PonderationTotal">60% / 100%</span>
+                </div>
+
+                <div class="BuilderFooter">
+                    <button class="SaveButton">Save Template</button>
+                    <a href="#" class="CancelButton">Cancel</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- APPLY POPUPS -->
+    <div class="popup" id="applyTemplate1">
+        <div class="popup-inner">
+            <h3> Apply Template</h3>
+            <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">
+                Applying: <strong style="color:white;">Web Programming — SOEN 287</strong>
+            </p>
+            <label>Apply to Course</label>
+            <select>
+                <option>SOEN 287 – Web Programming (Winter 2026)</option>
+                <option>SOEN 287 – Web Programming (Summer 2026)</option>
+                <option>New Course…</option>
+            </select>
+            <label>Term</label>
+            <select>
+                <option selected>Winter 2026</option>
+                <option>Summer 2026</option>
+                <option>Fall 2026</option>
+            </select>
+            <div class="TemplatePreview">
+                <p>This template will create these assessments:</p>
+                <ul>
+                    <li>Project Delivery 1 <span>15%</span></li>
+                    <li>Project Delivery 2 <span>15%</span></li>
+                    <li>Midterm Exam <span>30%</span></li>
+                    <li>Final Exam <span>40%</span></li>
+                </ul>
+            </div>
+            <div class="PopupButtons">
+                <button class="SaveButton">Confirm & Apply</button>
+                <a href="#" class="CancelButton">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="applyTemplate2">
+        <div class="popup-inner">
+            <h3>Apply Template</h3>
+            <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">
+                Applying: <strong style="color:white;">OOP II — COMP 249</strong>
+            </p>
+            <label>Apply to Course</label>
+            <select>
+                <option>COMP 249 – OOP II (Winter 2026)</option>
+                <option>COMP 249 – OOP II (Summer 2026)</option>
+                <option>New Course…</option>
+            </select>
+            <label>Term</label>
+            <select>
+                <option selected>Winter 2026</option>
+                <option>Summer 2026</option>
+                <option>Fall 2026</option>
+            </select>
+            <div class="TemplatePreview">
+                <p>This template will create these assessments:</p>
+                <ul>
+                    <li>Lab 1 – Inheritance <span>5%</span></li>
+                    <li>Lab 2 – Polymorphism <span>5%</span></li>
+                    <li>Assignment 1 <span>10%</span></li>
+                    <li>Midterm Exam <span>30%</span></li>
+                    <li>Assignment 2 <span>10%</span></li>
+                    <li>Final Exam <span>40%</span></li>
+                </ul>
+            </div>
+            <div class="PopupButtons">
+                <button class="SaveButton">Confirm & Apply</button>
+                <a href="#" class="CancelButton">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="applyTemplate3">
+        <div class="popup-inner">
+            <h3> Apply Template</h3>
+            <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">
+                Applying: <strong style="color:white;">Applied Calculus — ENGR 233</strong>
+            </p>
+            <label>Apply to Course</label>
+            <select>
+                <option>ENGR 233 – Applied Calculus (Winter 2026)</option>
+                <option>ENGR 233 – Applied Calculus (Summer 2026)</option>
+                <option>New Course…</option>
+            </select>
+            <label>Term</label>
+            <select>
+                <option selected>Winter 2026</option>
+                <option>Summer 2026</option>
+                <option>Fall 2026</option>
+            </select>
+            <div class="TemplatePreview">
+                <p>This template will create these assessments:</p>
+                <ul>
+                    <li>WebWork Assignments <span>10%</span></li>
+                    <li>Quiz 1 <span>10%</span></li>
+                    <li>Midterm Exam <span>40%</span></li>
+                    <li>Final Exam <span>40%</span></li>
+                </ul>
+            </div>
+            <div class="PopupButtons">
+                <button class="SaveButton">Confirm & Apply</button>
+                <a href="#" class="CancelButton">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT POPUPS -->
+    <div class="popup" id="editTemplate1">
+        <div class="popup-inner">
+            <h3>✏ Edit Template</h3>
+            <label>Template Name</label>
+            <input type="text" value="Web Programming — SOEN 287" />
+            <label>Course Code Pattern</label>
+            <input type="text" value="SOEN 287" />
+            <label>Department</label>
+            <select>
+                <option selected>SOEN – Software Engineering</option>
+                <option>COMP – Computer Science</option>
+                <option>ENGR – Engineering</option>
+            </select>
+            <div class="PopupButtons">
+                <button class="SaveButton">Save Changes</button>
+                <a href="#" class="CancelButton">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="editTemplate2">
+        <div class="popup-inner">
+            <h3>✏ Edit Template</h3>
+            <label>Template Name</label>
+            <input type="text" value="OOP II — COMP 249" />
+            <label>Course Code Pattern</label>
+            <input type="text" value="COMP 249" />
+            <label>Department</label>
+            <select>
+                <option>SOEN – Software Engineering</option>
+                <option selected>COMP – Computer Science</option>
+                <option>ENGR – Engineering</option>
+            </select>
+            <div class="PopupButtons">
+                <button class="SaveButton"> Save Changes</button>
+                <a href="#" class="CancelButton">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="editTemplate3">
+        <div class="popup-inner">
+            <h3>✏ Edit Template</h3>
+            <label>Template Name</label>
+            <input type="text" value="Applied Calculus — ENGR 233" />
+            <label>Course Code Pattern</label>
+            <input type="text" value="ENGR 233" />
+            <label>Department</label>
+            <select>
+                <option>SOEN – Software Engineering</option>
+                <option>COMP – Computer Science</option>
+                <option selected>ENGR – Engineering</option>
+            </select>
+            <div class="PopupButtons">
+                <button class="SaveButton">Save Changes</button>
+                <a href="#" class="CancelButton">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
