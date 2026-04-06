@@ -133,6 +133,44 @@ function validateAssessmentPayload(payload) {
     return null;
 }
 
+function enforceWeightInputLimit(input) {
+    if (!input || input.dataset.weightLimitReady === 'true') return;
+
+    input.dataset.weightLimitReady = 'true';
+    input.setAttribute('min', '0');
+    input.setAttribute('max', '100');
+    input.setAttribute('step', '0.01');
+
+    input.addEventListener('input', () => {
+        if (input.value === '') {
+            input.setCustomValidity('');
+            return;
+        }
+
+        const numericValue = Number(input.value);
+
+        if (!Number.isFinite(numericValue)) {
+            input.setCustomValidity('Please enter a valid weight.');
+            input.reportValidity();
+            return;
+        }
+
+        if (numericValue > 100) {
+            input.value = '100';
+        } else if (numericValue < 0) {
+            input.value = '0';
+        }
+
+        input.setCustomValidity('');
+    });
+}
+
+function initializeWeightInputs(scope = document) {
+    scope.querySelectorAll('.js-weight, #newWeight').forEach((input) => {
+        enforceWeightInputLimit(input);
+    });
+}
+
 function calculatePercentage(earnedMarks, totalMarks) {
     if (earnedMarks === null || earnedMarks === undefined || earnedMarks === '') return null;
     if (totalMarks === null || totalMarks === undefined || totalMarks === '' || Number(totalMarks) === 0) {
@@ -156,7 +194,7 @@ function createRow(grade) {
         <td><input type="date" class="assessments-input js-due"
             value="${dueDate}" disabled></td>
         <td><input type="number" class="assessments-input js-weight"
-            min="0" step="0.01" value="${grade.weight ?? ''}" disabled></td>
+            min="0" max="100" step="0.01" value="${grade.weight ?? ''}" disabled></td>
         <td><input type="number" class="assessments-input js-earned"
             min="0" step="0.01" value="${grade.earned_marks ?? ''}" disabled></td>
         <td><input type="number" class="assessments-input js-total"
@@ -188,6 +226,8 @@ async function loadAssessments() {
         grades.forEach((grade) => {
             tbody.innerHTML += createRow(grade);
         });
+
+        initializeWeightInputs(tbody);
 
         if (!grades.length) {
             tbody.innerHTML = `
@@ -374,6 +414,7 @@ async function addAssessment() {
 }
 
 function openModal() {
+    initializeWeightInputs();
     document.getElementById('addModal').style.display = 'flex';
 }
 
@@ -405,4 +446,6 @@ window.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
     }
+
+    initializeWeightInputs();
 });
