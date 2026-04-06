@@ -7,10 +7,14 @@ const monthBtn = document.getElementById("monthBtn");
 const monthSelect = document.getElementById("monthSelect");
 const yearSelect = document.getElementById("yearSelect");
 const monthControls = document.getElementById("monthControls");
+const upcomingDeadlinesList = document.getElementById("upcomingDeadlinesList");
+const recentAssessmentsList = document.getElementById("recentAssessmentsList");
 
 const today = new Date();
+const WEEKDAY_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const SHORT_MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function parseDueDate(value) {
+function parseDate(value) {
     if (!value) return null;
     if (value instanceof Date) return value;
 
@@ -35,6 +39,26 @@ function formatWeight(weight) {
     return `Ponderation ${displayWeight}%`;
 }
 
+function formatShortDate(date) {
+    return date.toLocaleDateString("en-CA", {
+        month: "short",
+        day: "numeric"
+    });
+}
+
+function formatCalendarDateLabel(date) {
+    return `${SHORT_MONTH_LABELS[date.getMonth()]} ${date.getDate()}`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 async function loadAssignments() {
     try {
         const response = await fetch(DASHBOARD_API);
@@ -45,7 +69,7 @@ async function loadAssignments() {
         const dashboardData = await response.json();
         assignmentsData = dashboardData
             .map((item) => {
-                const dueDate = parseDueDate(item.due_date);
+                const dueDate = parseDate(item.due_date);
                 if (!dueDate) return null;
 
                 return {
@@ -53,21 +77,93 @@ async function loadAssignments() {
                     courseName: item.course_name || "Unknown course",
                     weightLabel: formatWeight(item.weight),
                     date: dueDate,
+                    createdAt: parseDate(item.assessment_created_at || item.created_at || item.due_date),
                     done: item.status === "completed"
                 };
             })
-            .filter(Boolean);
+            .filter(Boolean)
+            .sort((a, b) => a.date - b.date);
     } catch (error) {
         console.error("Failed to load dashboard assignments:", error);
         assignmentsData = [];
     }
 }
 
+function renderAssessmentList(listElement, items, emptyMessage, datePrefix = "") {
+    if (!listElement) return;
+
+    if (items.length === 0) {
+        listElement.innerHTML = `
+            <li class="deadline-empty">${escapeHtml(emptyMessage)}</li>
+        `;
+        return;
+    }
+
+    listElement.innerHTML = items.map((item) => {
+        const dateLabel = item.displayDate
+            ? `${datePrefix}${formatShortDate(item.displayDate)}`
+            : datePrefix.trim() || "No date";
+
+        return `
+            <li class="deadline-item">
+                <div class="deadline-top-row">
+                    <span class="deadline-course">${escapeHtml(item.courseName)}</span>
+                    <span class="deadline-date">${escapeHtml(dateLabel)}</span>
+                </div>
+                <div class="deadline-title">${escapeHtml(item.title)}</div>
+                <div class="deadline-bottom-row">
+                    <span class="deadline-pill">${escapeHtml(item.weightLabel)}</span>
+                </div>
+            </li>
+        `;
+    }).join("");
+}
+
+function renderUpcomingDeadlines() {
+    const upcomingItems = assignmentsData
+        .slice(0, 3)
+        .map((item) => ({ ...item, displayDate: item.date }));
+
+    renderAssessmentList(
+        upcomingDeadlinesList,
+        upcomingItems,
+        "No assessments to show.",
+        "Due "
+    );
+}
+
+function renderRecentAssessments() {
+    const recentItems = [...assignmentsData]
+        .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
+        .slice(0, 3)
+        .map((item) => ({ ...item, displayDate: item.createdAt }));
+
+    renderAssessmentList(
+        recentAssessmentsList,
+        recentItems,
+        "No assessments to show.",
+        "Added "
+    );
+}
+
+function createWeekdayHeader(label) {
+    const header = document.createElement("div");
+    header.className = "calendar-column-header";
+    header.textContent = label;
+    return header;
+}
+
 function renderWeek() {
     calendar.innerHTML = "";
-    calendar.className = "calendar-container week-view";
+    calendar.className = "calendar-container week-table";
+
+    WEEKDAY_LABELS.forEach((label) => {
+        calendar.appendChild(createWeekdayHeader(label));
+    });
+
     const start = new Date(today);
     start.setDate(today.getDate() - today.getDay());
+
     for (let i = 0; i < 7; i++) {
         const day = new Date(start);
         day.setDate(start.getDate() + i);
@@ -77,21 +173,24 @@ function renderWeek() {
 
 function renderMonth(month, year) {
     calendar.innerHTML = "";
-    calendar.className = "calendar month";
+    calendar.className = "calendar month-table";
+
+    WEEKDAY_LABELS.forEach((label) => {
+        calendar.appendChild(createWeekdayHeader(label));
+    });
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
     for (let i = 0; i < firstDay.getDay(); i++) {
         const empty = document.createElement("div");
-        empty.className = "day-card";
+        empty.className = "day-card empty-day";
         calendar.appendChild(empty);
     }
 
     for (let d = 1; d <= lastDay.getDate(); d++) {
         const date = new Date(year, month, d);
-        const card = createDayCard(date);
-        calendar.appendChild(card);
+        calendar.appendChild(createDayCard(date));
     }
 }
 
@@ -109,16 +208,8 @@ function createDayCard(date) {
     }
 
     const dayLabel = document.createElement("div");
-    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    dayLabel.textContent = `${weekdays[date.getDay()]} ${date.getDate()}`;
-    dayLabel.style.fontSize = "12px";
-    dayLabel.style.fontWeight = "bold";
-    dayLabel.style.position = "absolute";
-    dayLabel.style.top = "4px";
-    dayLabel.style.left = "4px";
-    dayLabel.style.color = "#2d1b6e";
-
-    card.style.position = "relative";
+    dayLabel.className = "calendar-date-label";
+    dayLabel.textContent = formatCalendarDateLabel(date);
     card.appendChild(dayLabel);
 
     assignmentsData.forEach((assignmentData) => {
@@ -132,9 +223,9 @@ function createDayCard(date) {
             if (assignmentData.done) assignment.classList.add("done");
             assignment.innerHTML = `
                 <div class="assignment-content">
-                    <span class="assignment-title">${assignmentData.title}</span>
-                    <span class="assignment-course">${assignmentData.courseName}</span>
-                    <span class="assignment-weight">${assignmentData.weightLabel}</span>
+                    <span class="assignment-title">${escapeHtml(assignmentData.title)}</span>
+                    <span class="assignment-course">${escapeHtml(assignmentData.courseName)}</span>
+                    <span class="assignment-weight">${escapeHtml(assignmentData.weightLabel)}</span>
                 </div>
                 <button class="done-btn" type="button">Done</button>
             `;
@@ -195,11 +286,11 @@ yearSelect.addEventListener("change", () => {
 
 async function initializeCalendar() {
     await loadAssignments();
+    renderUpcomingDeadlines();
+    renderRecentAssessments();
     renderWeek();
     monthControls.style.display = "none";
     weekBtn.classList.add("active");
 }
 
 initializeCalendar();
-
-

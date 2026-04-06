@@ -8,7 +8,6 @@
 </head>
 <body>
 
-<!-- Top bar with back button -->
 <nav class="navbar">
     <h2>Smart Course Companion</h2>
     <ul>
@@ -18,19 +17,19 @@
     </ul>
     <div class="nav-icons">
         <div class="lightmode" onclick="toggleTheme()">
-            <img src="https://static.thenounproject.com/png/4808961-200.png" 
-                alt="light mode icon"/>
+            <img src="https://static.thenounproject.com/png/4808961-200.png"
+                alt="light mode icon">
         </div>
         <div class="myaccount">
             <a href="myaccount.html">
-                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" 
-                    alt="My Account"/>
+                <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png"
+                    alt="My Account">
             </a>
         </div>
         <div class="logout">
             <a href="Login_s.html">
-                <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png" 
-                    alt="Logout"/>
+                <img src="https://www.clipartmax.com/png/middle/36-367350_png-file-logout-icon.png"
+                    alt="Logout">
             </a>
         </div>
     </div>
@@ -38,30 +37,27 @@
 
 <main class="content">
     <h1>My Account</h1>
+    <div id="accountStatus" class="account-status" hidden></div>
 
     <div class="account-container">
-
         <div class="account-card">
             <h2>Student Information</h2>
-            <p><strong>Name:</strong> michael jackson</p>
-            <p><strong>Student ID:</strong> 12345678</p>
-            <p><strong>Email:</strong> michaeljackson@random.com</p>
-            <p><strong>Phone Number:</strong> (555) 123-4567</p>
-            <p><strong>Emergency Contact:</strong> jane doe - (555) 987-6543</p>
+            <p><strong>Name:</strong> <span id="studentName">Loading...</span></p>
+            <p><strong>Student Number:</strong> <span id="studentNumber">Loading...</span></p>
+            <p><strong>Email:</strong> <span id="studentEmail">Loading...</span></p>
+            <p><strong>Account Created:</strong> <span id="studentCreatedAt">Loading...</span></p>
         </div>
 
         <div class="account-card">
             <h2>Current Semester Courses</h2>
-            <ul class="course-list">
-                <li>ENGR 233</li>
-                <li>SOEN 287</li>
-                <li>SOEN 228</li>
-                <li>COMP 249</li>
+            <ul id="courseList" class="course-list">
+                <li class="account-empty">Loading courses...</li>
             </ul>
         </div>
-
     </div>
 </main>
 
+<script src="nav-active.js"></script>
+<script src="myaccount.js"></script>
 </body>
 </html>
